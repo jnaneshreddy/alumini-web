@@ -4,6 +4,7 @@ import {
   Bell,
   CalendarDays,
   Image,
+  Images,
   LayoutDashboard,
   MessageSquare,
   ScrollText,
@@ -12,11 +13,14 @@ import {
 } from "lucide-react";
 
 const nav = [
-  ["/admin", "Overview", LayoutDashboard],
-  ["/admin/carousel", "Carousel photos", Image],
-  ["/admin/announcements", "Announcements", Bell],
-  ["/admin/events", "Events", CalendarDays],
+  ["/admin", "Dashboard", LayoutDashboard],
   ["/admin/users", "Users & access", Users],
+  ["/admin/alumni", "Alumni", Users],
+  ["/admin/events", "Events", CalendarDays],
+  ["/admin/announcements", "Announcements", Bell],
+  ["/admin/gallery", "Photo gallery", Images],
+  ["/admin/memories", "Memories", Image],
+  ["/admin/carousel", "Hero carousel", Image],
   ["/admin/feedback", "Feedback", MessageSquare],
   ["/admin/activity", "Activity log", ScrollText],
   ["/admin/settings", "Settings", Settings],

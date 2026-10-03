@@ -74,7 +74,9 @@ async function saveUploadedImage(file: File | null, existingPath?: string | null
   return data.publicUrl;
 }
 
-export async function saveEvent(formData: FormData) {
+export type EventActionResult = { ok: boolean; message: string };
+
+export async function saveEvent(formData: FormData): Promise<EventActionResult> {
   try {
     await requireRole(...contentRoles);
 
@@ -95,12 +97,12 @@ export async function saveEvent(formData: FormData) {
     const file = uploadedFile instanceof File && uploadedFile.size > 0 ? uploadedFile : null;
 
     if (!title || !eventDate) {
-      return;
+      return { ok: false, message: "Event title and date are required." };
     }
 
     const parsedDate = new Date(eventDate);
     if (Number.isNaN(parsedDate.getTime())) {
-      return;
+      return { ok: false, message: "Enter a valid event date." };
     }
 
     const existingEvent = id ? await prisma.event.findUnique({ where: { id } }) : null;
@@ -138,9 +140,10 @@ export async function saveEvent(formData: FormData) {
     revalidatePath("/");
     revalidatePath("/admin");
     revalidatePath("/admin/events");
+    return { ok: true, message: id ? "Event updated successfully. You can now create a new event." : "Event created successfully." };
   } catch (error) {
     console.error("saveEvent failed", error);
-    return;
+    return { ok: false, message: error instanceof Error ? error.message : "Unable to save the event. Please try again." };
   }
 }
 

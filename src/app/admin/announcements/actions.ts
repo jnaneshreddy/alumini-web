@@ -5,8 +5,9 @@ import { prisma } from "@/lib/prisma";
 import { contentRoles, requireRole } from "@/lib/permissions";
 
 const text = (formData: FormData, name: string) => String(formData.get(name) ?? "").trim();
+export type AnnouncementActionResult = { ok: boolean; message: string };
 
-export async function saveAnnouncement(formData: FormData) {
+export async function saveAnnouncement(formData: FormData): Promise<AnnouncementActionResult> {
   await requireRole(...contentRoles);
 
   const id = text(formData, "id");
@@ -19,7 +20,7 @@ export async function saveAnnouncement(formData: FormData) {
   const publishedAtValue = text(formData, "publishedAt");
 
   if (!title || !body) {
-    throw new Error("Title and announcement text are required.");
+    return { ok: false, message: "Title and announcement text are required." };
   }
 
   const publishedAt = publishedAtValue ? new Date(publishedAtValue) : status === "PUBLISHED" ? new Date() : null;
@@ -48,6 +49,7 @@ export async function saveAnnouncement(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/admin");
   revalidatePath("/admin/announcements");
+  return { ok: true, message: id ? "Announcement updated successfully. You can now create a new announcement." : "Announcement created successfully." };
 }
 
 export async function deleteAnnouncement(formData: FormData) {

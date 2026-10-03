@@ -7,7 +7,11 @@ import "./finance/finance.css";
 import "./finance/workspace.css";
 import "./login/login.css";
 import "./users/users.css";
+import "./users/management.css";
+import "./gallery/gallery.css";
 import "./redesign.css";
+import "./contrast-fixes.css";
+import "./workspaces.css";
 import { AdminShell } from "@/components/admin-shell";
 
 export default function AdminLayout({ children }: LayoutProps<"/admin">) {

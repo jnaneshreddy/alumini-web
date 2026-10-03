@@ -10,10 +10,23 @@ datasource db {
 
 enum Role {
   SUPER_ADMIN
-  TREASURER
-  SECRETARY
-  EDITOR
-  VIEWER
+  ADMIN
+  USER
+}
+
+enum GalleryType {
+  PHOTO_GALLERY
+  MEMORY
+}
+
+enum GalleryCategory {
+  SCHOOL_MEMORIES
+  CAMPUS
+  EVENTS
+  ALUMNI
+  REUNIONS
+  TEACHERS
+  STUDENT_LIFE
 }
 
 enum PublishStatus {
@@ -33,19 +46,101 @@ enum EventStatus {
   CANCELLED
 }
 
+enum AlumniVerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum AlumniRegistrantType {
+  ALUMNI
+  STUDENT
+  TEACHER
+}
+
 model UserProfile {
-  id           String                 @id @default(uuid())
-  authUserId   String                 @unique
-  email        String                 @unique
-  fullName     String
-  role         Role                   @default(VIEWER)
-  active       Boolean                @default(true)
-  createdAt    DateTime               @default(now())
-  updatedAt    DateTime               @updatedAt
-  transactions FinancialTransaction[]
-  auditLogs    AuditLog[]
+  id              String                 @id @default(uuid())
+  authUserId      String                 @unique
+  email           String                 @unique
+  fullName        String
+  role            Role                   @default(USER)
+  active          Boolean                @default(true)
+  phone           String?
+  batch           String?
+  avatarUrl       String?
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+  transactions    FinancialTransaction[]
+  auditLogs       AuditLog[]
+  galleryImages   GalleryImage[]
+  alumniCreated   AlumniProfile[]        @relation("AlumniCreatedBy")
+  alumniVerified  AlumniProfile[]        @relation("AlumniVerifiedBy")
+  notifications   AdminNotification[]
+  settingsUpdates SiteSettings[]         @relation("SettingsUpdatedBy")
 
   @@map("user_profiles")
+}
+
+model AlumniProfile {
+  id                 String                   @id @default(uuid())
+  fullName           String
+  registrantType     AlumniRegistrantType     @default(ALUMNI)
+  email              String?
+  phone              String?
+  batch              String
+  graduationYear     Int?
+  city               String?
+  profession         String?
+  bio                String?
+  avatarUrl          String?
+  consentToPublish   Boolean                  @default(false)
+  consentRecordedAt  DateTime?
+  verificationStatus AlumniVerificationStatus @default(PENDING)
+  isPublished        Boolean                  @default(false)
+  createdById        String?
+  verifiedById       String?
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+  createdBy          UserProfile?             @relation("AlumniCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  verifiedBy         UserProfile?             @relation("AlumniVerifiedBy", fields: [verifiedById], references: [id], onDelete: SetNull)
+
+  @@index([batch, verificationStatus])
+  @@index([isPublished, verificationStatus])
+  @@map("alumni_profiles")
+}
+
+model AdminNotification {
+  id          String      @id @default(uuid())
+  recipientId String
+  title       String
+  message     String
+  category    String      @default("SYSTEM")
+  href        String?
+  readAt      DateTime?
+  clearedAt   DateTime?
+  createdAt   DateTime    @default(now())
+  recipient   UserProfile @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId, clearedAt, createdAt])
+  @@index([recipientId, readAt])
+  @@map("admin_notifications")
+}
+
+model SiteSettings {
+  id               String       @id
+  organizationName String       @default("Morarji Desai Residential School")
+  portalName       String       @default("MDRS Alumni")
+  supportEmail     String?
+  supportPhone     String?
+  timezone         String       @default("Asia/Kolkata")
+  notifyFeedback   Boolean      @default(true)
+  notifyAlumni     Boolean      @default(true)
+  notifyAccess     Boolean      @default(true)
+  updatedById      String?
+  updatedAt        DateTime     @updatedAt
+  updatedBy        UserProfile? @relation("SettingsUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@map("site_settings")
 }
 
 model CarouselSlide {
@@ -96,9 +191,39 @@ model Event {
   createdAt     DateTime               @default(now())
   updatedAt     DateTime               @updatedAt
   transactions  FinancialTransaction[]
+  galleryImages GalleryImage[]
 
   @@index([eventDate, publication])
   @@map("events")
+}
+
+model GalleryImage {
+  id            String          @id @default(uuid())
+  titleEn       String?
+  titleKn       String?
+  descriptionEn String?
+  descriptionKn String?
+  altText       String
+  imageUrl      String
+  storagePath   String?         @unique
+  thumbnailUrl  String?
+  category      GalleryCategory @default(SCHOOL_MEMORIES)
+  galleryType   GalleryType     @default(PHOTO_GALLERY)
+  eventId       String?
+  date          DateTime?
+  isFeatured    Boolean         @default(false)
+  isPublished   Boolean         @default(false)
+  sortOrder     Int             @default(0)
+  uploadedById  String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  event         Event?          @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  uploadedBy    UserProfile?    @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  @@index([galleryType, isPublished, isFeatured, sortOrder])
+  @@index([category, isPublished])
+  @@index([eventId])
+  @@map("gallery_images")
 }
 
 model FinancialYear {

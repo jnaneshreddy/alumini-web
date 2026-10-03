@@ -8,6 +8,15 @@ import { saveCarouselSlide, deleteCarouselSlide } from "../carousel/actions";
 import { saveAnnouncement, deleteAnnouncement } from "../announcements/actions";
 
 const sections: Record<string, { title: string; description: string; items: string[] }> = {
+  alumni: {
+    title: "Alumni",
+    description: "The verified alumni registry will be managed here once its consent-based data model is approved.",
+    items: [
+      "Add only verified alumni profiles",
+      "Record consent before publishing personal information",
+      "Connect alumni to batches without inventing records",
+    ],
+  },
   carousel: {
     title: "Carousel photos",
     description: "Manage the images displayed on the homepage hero carousel.",
@@ -42,6 +51,15 @@ const sections: Record<string, { title: string; description: string; items: stri
       "Review administrator accounts",
       "Assign Super Admin, Treasurer and Editor roles",
       "Deactivate access while retaining audit history",
+    ],
+  },
+  settings: {
+    title: "Settings",
+    description: "Privileged institutional settings are reserved for a reviewed, auditable configuration workflow.",
+    items: [
+      "Keep secrets and storage credentials server-side",
+      "Review security-sensitive changes before activation",
+      "Record privileged configuration changes in the audit trail",
     ],
   },
 };

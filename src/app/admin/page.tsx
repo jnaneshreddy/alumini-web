@@ -9,7 +9,7 @@ export default async function AdminPage() {
     prisma.event.findMany({ where: { status: "UPCOMING" }, orderBy: { eventDate: "asc" }, take: 4 }),
     prisma.announcement.findMany({ where: { status: "PUBLISHED" }, orderBy: { publishedAt: "desc" }, take: 4 }),
     prisma.carouselSlide.count({ where: { status: "PUBLISHED" } }),
-    prisma.userProfile.count({ where: { active: true } }),
+    prisma.userProfile.count({ where: { active: true, role: { in: ["ADMIN", "SUPER_ADMIN"] } } }),
     prisma.feedback.count(),
     prisma.auditLog.findMany({ orderBy: { createdAt: "desc" }, take: 5, include: { user: true } }),
   ]);

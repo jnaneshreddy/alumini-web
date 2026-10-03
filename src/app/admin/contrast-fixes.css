@@ -1,0 +1,179 @@
+/* Final light-theme contrast layer. Keep the navigation and modal overlays dark. */
+.commandWorkspace {
+  --admin-gold: #805014;
+  --admin-copy: #34483e;
+  --admin-copy-muted: #5f7168;
+  --admin-copy-soft: #68776f;
+  --admin-surface-soft: #f6f8f5;
+  --admin-surface-tint: #edf3ee;
+}
+
+.commandWorkspace :is(input, textarea)::placeholder { color: #68776f; opacity: 1; }
+.commandWorkspace :is(input, textarea, select):focus-visible { outline: 3px solid #28584638; outline-offset: 1px; }
+
+/* Dashboard cards and lists. */
+.dashboardPanel :is(.timelineList, .activityList, .announcementList) b { color: var(--admin-ink); }
+.dashboardPanel :is(.timelineList, .activityList, .announcementList) small,
+.dashboardPanel :is(.activityList, .announcementList) p { color: var(--admin-copy-muted); }
+.dashboardPanel .timelineList .eventLink { color: var(--admin-copy); }
+.dashboardPanel .widgetEmpty b { color: var(--admin-ink); }
+.dashboardPanel .widgetEmpty small { color: var(--admin-copy-muted); }
+.dashboardPanel .panelHeader [data-slot=button] { color: var(--admin-green); }
+
+/* Shared light editor panels and labels. */
+.announcementEditor, .announcementListPanel,
+.studioEditor, .studioGallery,
+.eventEditor, .eventListPanel,
+.galleryUploadPanel, .galleryLibrary,
+.usersPanel, .userMetrics article,
+.financePanel, .financeMetrics article {
+  border-color: var(--admin-line) !important;
+  background: var(--admin-paper) !important;
+  box-shadow: none !important;
+}
+
+.announcementEditor > label, .announcementFields label,
+.studioFields label, .studioEditor > label,
+.eventEditor > label, .eventFields label,
+.galleryUploadPanel > label, .galleryFormGrid label,
+.financeForm label { color: var(--admin-copy) !important; }
+
+.announcementEditor em, .studioEditor em, .eventEditor em,
+.galleryUploadPanel em, .financeForm em { color: var(--admin-copy-soft) !important; }
+
+.announcementEditor :is(input, textarea, select),
+.studioEditor :is(input, textarea, select),
+.eventEditor :is(input, textarea, select),
+.galleryUploadPanel :is(input, textarea, select),
+.financeForm :is(input, textarea, select) {
+  border-color: var(--admin-line) !important;
+  background: #fff !important;
+  color: var(--admin-ink) !important;
+}
+
+.announcementEditor :is(input, textarea, select):focus,
+.studioEditor :is(input, textarea, select):focus,
+.eventEditor :is(input, textarea, select):focus,
+.galleryUploadPanel :is(input, textarea, select):focus,
+.financeForm :is(input, textarea, select):focus {
+  border-color: #789484 !important;
+  background: #fff !important;
+  box-shadow: 0 0 0 3px #28584618 !important;
+}
+
+.textButton { color: var(--admin-green); }
+.studioCount span, .financeMetrics b, .userMetrics b { color: var(--admin-ink); }
+.studioCount small, .financeMetrics :is(p, small), .userMetrics p { color: var(--admin-copy-muted); }
+.financePanel svg, .userMetrics svg { color: var(--admin-green); }
+.panelRule { background: var(--admin-line); }
+
+/* Announcements. */
+.announcementCard { border-color: var(--admin-line) !important; background: var(--admin-surface-soft) !important; box-shadow: none !important; }
+.announcementCard h3 { color: var(--admin-ink); }
+.announcementCard > p, .announcementCard footer > span { color: var(--admin-copy-muted); }
+.announcementCard footer { border-color: var(--admin-line); }
+.announcementCard button { border-color: var(--admin-line); background: #fff; color: var(--admin-green); }
+.priorityBadge { background: #e8eefc; color: #304f95; }
+.priorityBadge.important { background: #f7ecd8; color: #805518; }
+.priorityBadge.urgent { background: #f9e5e5; color: #983c3c; }
+.statusBadge { background: #e9eeea; color: #53655b; }
+.statusBadge.published { background: #e3f2e8; color: #1f6847; }
+.statusBadge.archived { color: #5f6e66; }
+.announcementEmpty { border-color: var(--admin-line); color: var(--admin-copy-muted); }
+.announcementEmpty h3 { color: var(--admin-ink); }
+.announcementCard, .announcementCard > div, .record-archive article > div { min-width: 0; }
+.announcementCard :is(h3, p, small), .announcementList :is(b, p, small), .record-archive article :is(h2, p, small), .notice-row :is(h3, p) { overflow-wrap: anywhere; word-break: break-word; }
+.editorActionMessage { display: flex; align-items: center; gap: 7px; margin: 14px 0 0; padding: 10px 12px; border: 1px solid var(--admin-line); background: var(--admin-surface-soft); color: var(--admin-copy); font-size: 11px; line-height: 1.45; }
+.editorActionMessage.success { border-color: #9cc6aa; background: #edf7f0; color: #1f6847; }
+.editorActionMessage.error { border-color: #dfaaa6; background: #fff0ef; color: #983c3c; }
+
+/* Carousel and event libraries. */
+.uploadZone:not(:has(img)), .eventUpload:not(:has(img)) {
+  border-color: #9cb0a2 !important;
+  background: var(--admin-surface-soft) !important;
+  color: var(--admin-green) !important;
+}
+.uploadZone:not(:has(img)) strong, .eventUpload:not(:has(img)) strong { color: var(--admin-ink); }
+.uploadZone:not(:has(img)) span, .eventUpload:not(:has(img)) span { color: var(--admin-copy-muted); }
+.slideCard, .eventCard { border-color: var(--admin-line); background: #fff; box-shadow: none; }
+.slideCardBody h3, .eventCard h3 { color: var(--admin-ink); }
+.slideCardBody p, .eventCard p { color: var(--admin-copy-muted); }
+.slideCardActions button, .eventCard button { border-color: var(--admin-line); background: var(--admin-surface-soft); color: var(--admin-green); }
+.eventCardMeta span { color: #805518; }
+.eventCardMeta small { background: #e9eeea; color: #52645a; }
+.eventCard footer { border-color: var(--admin-line); }
+.eventCard footer > span { color: #246a49; }
+.studioEmpty, .eventEmpty { border-color: var(--admin-line); color: var(--admin-copy-muted); }
+.studioEmpty h3, .eventEmpty h3 { color: var(--admin-ink); }
+
+/* Users and access. */
+.userSearch, .userFilters label { border-color: var(--admin-line); background: #fff; color: var(--admin-copy-muted); }
+.userSearch input, .userFilters select { color: var(--admin-ink); }
+.usersTable tbody tr:hover { background: var(--admin-surface-soft); }
+.userIdentity > span { background: #e5eee7; color: var(--admin-green); }
+.userIdentity b { color: var(--admin-ink); }
+.userIdentity small { color: var(--admin-copy-muted); }
+.roleBadge { background: #e8eefc; color: #304f95; }
+.role-super_admin { background: #f7ecd8; color: #795015; }
+.role-admin { background: #e8eefc; color: #304f95; }
+.role-user { background: #e9eeea; color: #52645a; }
+.activeBadge { background: #e3f2e8; color: #1f6847; }
+.inactiveBadge { background: #f9e5e5; color: #983c3c; }
+.userRowActions button { border-color: var(--admin-line); background: #fff; color: var(--admin-green); }
+.userRowActions .alumniApproveButton { display: inline-flex; width: auto; align-items: center; gap: 6px; padding: 0 10px; border-color: #8fc7a8; background: #eaf6ee; color: #185f3b; font-size: 12px; font-weight: 800; }
+.userRowActions .alumniApproveButton svg { width: 15px; height: 15px; }
+.userRowActions .alumniApproveButton:disabled { cursor: wait; opacity: .62; }
+.userRowActions .alumniDenyButton { display: inline-flex; width: auto; align-items: center; gap: 6px; padding: 0 10px; border-color: #e3abaa; background: #fff1f0; color: #9c3330; font-size: 12px; font-weight: 800; }
+.userRowActions .alumniDenyButton svg { width: 15px; height: 15px; }
+.userRowActions .alumniDenyButton:disabled { cursor: wait; opacity: .62; }
+.alumniHeaderActions, .alumniExportActions { display: flex; align-items: center; gap: 8px; }
+.alumniExportActions button { display: inline-flex; align-items: center; gap: 5px; min-height: 38px; padding: 0 10px; border: 1px solid var(--admin-line); border-radius: 8px; background: #fff; color: var(--admin-green); font-size: 11px; font-weight: 800; cursor: pointer; }
+.alumniExportActions button svg { width: 15px; height: 15px; }
+.alumniExportActions button:disabled { cursor: not-allowed; opacity: .45; }
+.userRowActions .alumniDeleteButton { border-color: #e3abaa; background: #fff1f0; color: #9c3330; }
+@media (max-width: 720px) { .alumniHeaderActions { align-items: stretch; flex-direction: column-reverse; width: 100%; } .alumniExportActions { display: grid; grid-template-columns: repeat(3, 1fr); } .alumniExportActions button { justify-content: center; } }
+.usersEmpty { color: var(--admin-copy-muted); }
+.usersEmpty b { color: var(--admin-ink); }
+.userActionMessage { border-color: #a9bdab; background: #edf4ee; color: #315440; }
+
+/* Gallery and memory management. */
+.galleryAdminMessage { border-color: #a9bdab; background: #edf4ee; color: #315440; }
+.galleryDropzone {
+  border-color: #9cb0a2 !important;
+  background: var(--admin-surface-soft) !important;
+  color: var(--admin-green) !important;
+}
+.galleryDropzone strong { color: var(--admin-ink); }
+.galleryDropzone span { color: var(--admin-copy-muted); }
+.uploadQueue article { border-color: var(--admin-line); background: var(--admin-surface-soft); }
+.uploadQueue b { color: var(--admin-ink); }
+.uploadQueue small { color: var(--admin-copy-muted); }
+.uploadQueue button { background: #fff; color: var(--admin-green); }
+.galleryChecks label { color: var(--admin-copy); }
+.galleryLibraryHead h2 { color: var(--admin-ink); }
+.galleryLibraryHead button { border-color: var(--admin-line); background: #fff; color: var(--admin-copy-muted); }
+.galleryLibraryHead button.active { border-color: #789484; background: #e5eee7; color: var(--admin-green); }
+.galleryAdminItems article { border-color: var(--admin-line); background: #fff; }
+.galleryAdminCardBody strong { color: var(--admin-ink); }
+.galleryAdminCardBody small { color: var(--admin-copy-muted); }
+.galleryAdminCardBody button { border-color: var(--admin-line); background: var(--admin-surface-soft); color: var(--admin-green); }
+.galleryAdminCardBody button.danger { color: #a33d3d; }
+.galleryAdminEmpty { color: var(--admin-copy-muted); }
+.galleryAdminEmpty h3 { color: var(--admin-ink); }
+
+/* Finance and feedback. */
+.checkLabel { color: var(--admin-copy) !important; }
+.ledgerCount, .ledgerEmpty { color: var(--admin-copy-muted); }
+.ledgerTable td b, .ledgerEmpty b { color: var(--admin-ink); }
+.amountCell { color: var(--admin-ink) !important; }
+.ledgerType.income { background: #e3f2e8; color: #1f6847; }
+.ledgerType.expense { background: #f9e5e5; color: #983c3c; }
+.feedbackInboxMeta b { color: var(--admin-ink); }
+.feedbackInboxMeta span { background: #e8eefc; color: #304f95; }
+.feedbackInbox :is(small, p) { color: var(--admin-copy-muted); }
+.feedbackDeleteForm button { background: #f9e5e5; color: #983c3c; }
+
+@media (prefers-contrast: more) {
+  .commandWorkspace { --admin-copy-muted: #43534b; --admin-copy-soft: #53635a; }
+  .commandWorkspace :is(input, textarea, select, button, .dashboardPanel, .metricCard) { border-color: #aab6af !important; }
+}

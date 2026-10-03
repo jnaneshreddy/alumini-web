@@ -74,7 +74,9 @@ async function saveUploadedImage(file: File | null, existingPath?: string) {
   return data.publicUrl;
 }
 
-export async function saveCarouselSlide(formData: FormData) {
+export type CarouselActionResult = { ok: boolean; message: string };
+
+export async function saveCarouselSlide(formData: FormData): Promise<CarouselActionResult> {
   await requireRole(...contentRoles);
 
   const id = text(formData, "id");
@@ -88,11 +90,11 @@ export async function saveCarouselSlide(formData: FormData) {
   const file = uploadedFile instanceof File && uploadedFile.size > 0 ? uploadedFile : null;
 
   if (!title || !altText) {
-    throw new Error("Title and alt text are required.");
+    return { ok: false, message: "Title and accessible description are required." };
   }
 
   if (!file && !providedUrl) {
-    throw new Error("Please upload a photo or paste an image URL.");
+    return { ok: false, message: "Upload a photo or paste an image URL." };
   }
 
   const existingSlide = id ? await prisma.carouselSlide.findUnique({ where: { id } }) : null;
@@ -123,6 +125,7 @@ export async function saveCarouselSlide(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/admin");
   revalidatePath("/admin/carousel");
+  return { ok: true, message: id ? "Carousel slide updated successfully. You can now add a new slide." : "Carousel slide created successfully." };
 }
 
 export async function deleteCarouselSlide(formData: FormData) {
