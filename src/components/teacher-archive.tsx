@@ -28,7 +28,7 @@ function TeacherCard({ teacher, locale }: { teacher: PublicTeacher; locale: Publ
   </article>;
 }
 
-export function TeacherShowcase({ teachers, locale, showAllLink }: { teachers: PublicTeacher[]; locale: PublicLocale; showAllLink: boolean }) {
+export function TeacherShowcase({ teachers, locale }: { teachers: PublicTeacher[]; locale: PublicLocale }) {
   const t = publicMessages[locale];
   const reduceMotion = useReducedMotion();
   if (!teachers.length) return null;
@@ -38,7 +38,7 @@ export function TeacherShowcase({ teachers, locale, showAllLink }: { teachers: P
       <p>{t.teachersSubtitle}</p>
     </motion.div>
     <div className="teacher-grid homepage-teachers">{teachers.map((teacher, index) => <motion.div key={teacher.id} initial={reduceMotion ? false : { opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .15 }} transition={{ delay: Math.min(index * .06, .24) }}><TeacherCard teacher={teacher} locale={locale}/></motion.div>)}</div>
-    {showAllLink && <Link className="teachers-more" href="/teachers">{t.viewAllTeachers}<ArrowRight size={17}/></Link>}
+    <Link className="teachers-more" href="/teachers">{t.viewAllTeachers}<ArrowRight size={17}/></Link>
   </section>;
 }
 

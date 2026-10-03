@@ -22,7 +22,6 @@ type Props = {
   events: PublicEvent[];
   gallery: PublicGalleryImage[];
   teachers: PublicTeacher[];
-  hasMoreTeachers: boolean;
   unavailable: boolean;
 };
 
@@ -70,10 +69,10 @@ function Header({ locale, setLocale }: { locale: PublicLocale; setLocale: (local
     <a className="heritage-skip" href="#main-content">{t.skip}</a>
     <header className={`heritage-header ${compact ? "is-compact" : ""}`}>
       <a className="heritage-brand" href="#home" aria-label={`${t.school} ${t.home}`}><span aria-hidden="true">M</span><span><strong>{t.school}</strong><small>{t.alumni}</small></span></a>
-      <nav className="heritage-desktop-nav" aria-label="Primary navigation">{navTargets.map((target) => target === "teachers" ? <Link key={target} href="/teachers">{label[target]}</Link> : <a key={target} href={`#${target}`}>{label[target]}</a>)}<Link className="heritage-join-link" href="/join">Join community</Link></nav>
+      <nav className="heritage-desktop-nav" aria-label="Primary navigation">{navTargets.map((target) => <a key={target} href={`#${target}`}>{label[target]}</a>)}<Link className="heritage-join-link" href="/join">Join community</Link></nav>
       <div className="heritage-header-actions"><LanguageSwitch locale={locale} setLocale={setLocale}/><button className="heritage-menu-button" type="button" onClick={() => setOpen(true)} aria-label={t.openMenu} aria-expanded={open}><Menu size={21}/></button></div>
     </header>
-    <AnimatePresence>{open && <motion.div className="heritage-drawer" role="dialog" aria-modal="true" aria-label={t.openMenu} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: .35, ease: [0.22, 1, 0.36, 1] }}><div className="drawer-top"><span>{t.alumni}</span><button type="button" onClick={close} aria-label={t.closeMenu}><X/></button></div><nav>{navTargets.map((target, index) => target === "teachers" ? <Link key={target} href="/teachers" onClick={close}><span>{String(index + 1).padStart(2, "0")}</span>{label[target]}</Link> : <a key={target} href={`#${target}`} onClick={close}><span>{String(index + 1).padStart(2, "0")}</span>{label[target]}</a>)}<Link href="/join" onClick={close}><span>09</span>Join community</Link></nav><div className="drawer-language"><span>{t.language}</span><LanguageSwitch locale={locale} setLocale={setLocale}/></div></motion.div></motion.div>}</AnimatePresence>
+    <AnimatePresence>{open && <motion.div className="heritage-drawer" role="dialog" aria-modal="true" aria-label={t.openMenu} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: .35, ease: [0.22, 1, 0.36, 1] }}><div className="drawer-top"><span>{t.alumni}</span><button type="button" onClick={close} aria-label={t.closeMenu}><X/></button></div><nav>{navTargets.map((target, index) => <a key={target} href={`#${target}`} onClick={close}><span>{String(index + 1).padStart(2, "0")}</span>{label[target]}</a>)}<Link href="/join" onClick={close}><span>09</span>Join community</Link></nav><div className="drawer-language"><span>{t.language}</span><LanguageSwitch locale={locale} setLocale={setLocale}/></div></motion.div></motion.div>}</AnimatePresence>
   </>;
 }
 
@@ -153,7 +152,7 @@ function Footer({ locale, setLocale }: { locale: PublicLocale; setLocale: (local
   return <footer className="heritage-footer"><div><p className="heritage-eyebrow light">{t.established}</p><h2>{t.school}</h2><p>{t.footerLine}</p></div><address>{t.address}</address><nav aria-label="Footer navigation"><a href="#story">{t.story}</a><a href="#events">{t.events}</a><a href="#announcements">{t.announcements}</a><a href="#feedback">{t.feedback}</a><Link href="/join">Join community</Link><Link href="/admin/login">{t.admin}</Link></nav><div className="footer-base"><span>© {new Date().getFullYear()} {t.rights}</span><LanguageSwitch locale={locale} setLocale={setLocale}/></div></footer>;
 }
 
-export function PublicHome({ slides, notices, events, gallery, teachers, hasMoreTeachers, unavailable }: Props) {
+export function PublicHome({ slides, notices, events, gallery, teachers, unavailable }: Props) {
   const { locale, changeLocale, t } = useLocale();
-  return <main id="main-content" className={`heritage-site locale-${locale}`}><Header locale={locale} setLocale={changeLocale}/>{unavailable && <div className="heritage-service-note" role="status">{locale === "kn" ? "ನೇರ ಪ್ರಕಟಣೆಗಳು ತಾತ್ಕಾಲಿಕವಾಗಿ ಲಭ್ಯವಿಲ್ಲ." : "Live updates are temporarily unavailable."}</div>}<Hero slides={slides} locale={locale}/><Story locale={locale}/><Highlights locale={locale}/><Events events={events} locale={locale}/><Announcements notices={notices} locale={locale}/><TeacherShowcase teachers={teachers} locale={locale} showAllLink={hasMoreTeachers}/><HomepageGallery images={gallery} locale={locale}/><FeedbackForm locale={locale} messages={t}/><Footer locale={locale} setLocale={changeLocale}/></main>;
+  return <main id="main-content" className={`heritage-site locale-${locale}`}><Header locale={locale} setLocale={changeLocale}/>{unavailable && <div className="heritage-service-note" role="status">{locale === "kn" ? "ನೇರ ಪ್ರಕಟಣೆಗಳು ತಾತ್ಕಾಲಿಕವಾಗಿ ಲಭ್ಯವಿಲ್ಲ." : "Live updates are temporarily unavailable."}</div>}<Hero slides={slides} locale={locale}/><Story locale={locale}/><Highlights locale={locale}/><Events events={events} locale={locale}/><Announcements notices={notices} locale={locale}/><TeacherShowcase teachers={teachers} locale={locale}/><HomepageGallery images={gallery} locale={locale}/><FeedbackForm locale={locale} messages={t}/><Footer locale={locale} setLocale={changeLocale}/></main>;
 }
