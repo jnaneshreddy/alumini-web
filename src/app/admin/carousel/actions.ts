@@ -128,6 +128,10 @@ export async function saveCarouselSlide(formData: FormData): Promise<CarouselAct
   return { ok: true, message: id ? "Carousel slide updated successfully. You can now add a new slide." : "Carousel slide created successfully." };
 }
 
+export async function submitCarouselSlide(formData: FormData): Promise<void> {
+  await saveCarouselSlide(formData);
+}
+
 export async function deleteCarouselSlide(formData: FormData) {
   await requireRole(...contentRoles);
 

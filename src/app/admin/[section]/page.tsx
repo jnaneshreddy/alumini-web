@@ -4,8 +4,8 @@ import { contentRoles, requireRole } from "@/lib/permissions";
 import { AdminNavigateButton } from "@/components/admin-navigate-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { saveCarouselSlide, deleteCarouselSlide } from "../carousel/actions";
-import { saveAnnouncement, deleteAnnouncement } from "../announcements/actions";
+import { submitCarouselSlide, deleteCarouselSlide } from "../carousel/actions";
+import { submitAnnouncement, deleteAnnouncement } from "../announcements/actions";
 
 const sections: Record<string, { title: string; description: string; items: string[] }> = {
   alumni: {
@@ -99,7 +99,7 @@ export default async function SectionPage({ params }: PageProps<"/admin/[section
           <p>{data.description}</p>
 
           <div style={{ marginTop: 24, display: "grid", gap: 20 }}>
-            <form action={saveCarouselSlide} style={{ display: "grid", gap: 12, maxWidth: 720 }}>
+            <form action={submitCarouselSlide} style={{ display: "grid", gap: 12, maxWidth: 720 }}>
               <h3 style={{ margin: 0 }}>Add or update a slide</h3>
               <div style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
                 <input name="title" placeholder="Slide title" required style={{ padding: 10, borderRadius: 8, border: "1px solid #dbe3ef" }} />
@@ -127,7 +127,7 @@ export default async function SectionPage({ params }: PageProps<"/admin/[section
                 slides.map((slide) => (
                   <form
                     key={slide.id}
-                    action={saveCarouselSlide}
+                    action={submitCarouselSlide}
                     style={{
                       display: "grid",
                       gap: 12,
@@ -186,7 +186,7 @@ export default async function SectionPage({ params }: PageProps<"/admin/[section
           <p>{data.description}</p>
 
           <div style={{ marginTop: 24, display: "grid", gap: 20 }}>
-            <form action={saveAnnouncement} style={{ display: "grid", gap: 12, maxWidth: 720 }}>
+            <form action={submitAnnouncement} style={{ display: "grid", gap: 12, maxWidth: 720 }}>
               <h3 style={{ margin: 0 }}>Create announcement</h3>
               <input name="title" placeholder="Announcement title" required style={{ padding: 10, borderRadius: 8, border: "1px solid #dbe3ef" }} />
               <textarea name="body" rows={5} placeholder="Details or message" required style={{ padding: 10, borderRadius: 8, border: "1px solid #dbe3ef" }} />
@@ -214,7 +214,7 @@ export default async function SectionPage({ params }: PageProps<"/admin/[section
                 announcements.map((announcement) => (
                   <form
                     key={announcement.id}
-                    action={saveAnnouncement}
+                    action={submitAnnouncement}
                     style={{
                       display: "grid",
                       gap: 12,

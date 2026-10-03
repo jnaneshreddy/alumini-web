@@ -52,6 +52,10 @@ export async function saveAnnouncement(formData: FormData): Promise<Announcement
   return { ok: true, message: id ? "Announcement updated successfully. You can now create a new announcement." : "Announcement created successfully." };
 }
 
+export async function submitAnnouncement(formData: FormData): Promise<void> {
+  await saveAnnouncement(formData);
+}
+
 export async function deleteAnnouncement(formData: FormData) {
   await requireRole(...contentRoles);
 
