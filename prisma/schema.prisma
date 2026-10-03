@@ -77,6 +77,8 @@ model UserProfile {
   alumniVerified  AlumniProfile[]        @relation("AlumniVerifiedBy")
   notifications   AdminNotification[]
   settingsUpdates SiteSettings[]         @relation("SettingsUpdatedBy")
+  teachersCreated Teacher[]              @relation("TeacherCreatedBy")
+  teachersUpdated Teacher[]              @relation("TeacherUpdatedBy")
 
   @@map("user_profiles")
 }
@@ -226,6 +228,32 @@ model GalleryImage {
   @@map("gallery_images")
 }
 
+model Teacher {
+  id            String       @id @default(uuid())
+  nameEn        String
+  nameKn        String?
+  designationEn String
+  designationKn String?
+  descriptionEn String?
+  descriptionKn String?
+  imageUrl      String
+  storagePath   String?      @unique
+  startYear     Int
+  endYear       Int?
+  isCurrent     Boolean      @default(false)
+  isPublished   Boolean      @default(false)
+  sortOrder     Int          @default(0)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  createdById   String?
+  updatedById   String?
+  createdBy     UserProfile? @relation("TeacherCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy     UserProfile? @relation("TeacherUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([isPublished, isCurrent, endYear, startYear])
+  @@map("teachers")
+}
+
 model FinancialYear {
   id             String                 @id @default(uuid())
   name           String                 @unique
@@ -256,7 +284,7 @@ model FinancialTransaction {
   financialYearId String
   categoryId      String
   eventId         String?
-  createdById     String
+  createdById     String?
   type            TransactionType
   date            DateTime
   particulars     String
@@ -270,7 +298,7 @@ model FinancialTransaction {
   financialYear   FinancialYear     @relation(fields: [financialYearId], references: [id], onDelete: Restrict)
   category        FinancialCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   event           Event?            @relation(fields: [eventId], references: [id], onDelete: SetNull)
-  createdBy       UserProfile       @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  createdBy       UserProfile?      @relation(fields: [createdById], references: [id], onDelete: SetNull)
 
   @@index([financialYearId, date])
   @@index([eventId])

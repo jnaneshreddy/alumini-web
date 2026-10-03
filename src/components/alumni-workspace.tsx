@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { BadgeCheck, CheckCircle2, CircleX, Download, FileSpreadsheet, FileText, Filter, GraduationCap, LoaderCircle, Pencil, Plus, Search, ShieldCheck, Trash2, Users, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { approveAlumniProfile, deleteAlumniProfile, denyAlumniProfile, saveAlumniProfile } from "@/app/admin/alumni/actions";
@@ -43,6 +43,14 @@ export function AlumniWorkspace({ records }: { records: AlumniRecord[] }) {
     (status === "ALL" || record.verificationStatus === status)
     && `${record.fullName} ${record.email ?? ""} ${record.phone ?? ""} ${record.batch} ${record.graduationYear ?? ""}`.toLowerCase().includes(query.toLowerCase())
   )), [records, query, status]);
+  useEffect(() => {
+    if (!editorOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const close = (event: KeyboardEvent) => { if (event.key === "Escape") setEditorOpen(false); };
+    window.addEventListener("keydown", close);
+    return () => { document.body.style.overflow = previousOverflow; window.removeEventListener("keydown", close); };
+  }, [editorOpen]);
   const openEditor = (record: AlumniRecord | null) => { setSelected(record); setEditorOpen(true); setMessage(""); };
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -162,7 +170,7 @@ export function AlumniWorkspace({ records }: { records: AlumniRecord[] }) {
     </section>
     {editorOpen && <div className="userDialogBackdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setEditorOpen(false); }}>
       <form key={selected?.id ?? "new"} className="userDialog alumniEditor" onSubmit={submit} role="dialog" aria-modal="true" aria-labelledby="alumni-editor-title">
-        <header><div><p className="adminKicker">ALUMNI DIRECTORY</p><h2 id="alumni-editor-title">{selected ? "Edit alumni" : "Add alumni"}</h2></div><button type="button" onClick={() => setEditorOpen(false)} aria-label="Close editor"><X/></button></header>
+        <header><div><p className="adminKicker">ALUMNI DIRECTORY</p><h2 id="alumni-editor-title">{selected ? "Edit alumni" : "Add alumni"}</h2></div><button type="button" onClick={() => setEditorOpen(false)} aria-label="Close editor" autoFocus><X/></button></header>
         <input type="hidden" name="id" value={selected?.id ?? ""}/>
         <div className="alumniFormGrid">
           <label className="wide"><span>Full name</span><input name="fullName" required minLength={2} defaultValue={selected?.fullName ?? ""}/></label>

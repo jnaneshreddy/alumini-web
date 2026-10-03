@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Lora, Noto_Sans_Kannada } from "next/font/google";
 import "./globals.css";
+import "./image-fit.css";
 import "./redesign.css";
 import "./gallery.css";
+import "./teachers.css";
 
 const sans = Geist({ subsets: ["latin"], variable: "--font-sans" });
 const serif = Lora({ subsets: ["latin"], variable: "--font-serif" });

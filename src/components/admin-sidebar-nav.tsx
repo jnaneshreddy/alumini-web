@@ -9,6 +9,7 @@ import {
   MessageSquare,
   ScrollText,
   Settings,
+  GraduationCap,
   Users,
 } from "lucide-react";
 
@@ -16,6 +17,7 @@ const nav = [
   ["/admin", "Dashboard", LayoutDashboard],
   ["/admin/users", "Users & access", Users],
   ["/admin/alumni", "Alumni", Users],
+  ["/admin/teachers", "Teachers", GraduationCap],
   ["/admin/events", "Events", CalendarDays],
   ["/admin/announcements", "Announcements", Bell],
   ["/admin/gallery", "Photo gallery", Images],
@@ -26,7 +28,7 @@ const nav = [
   ["/admin/settings", "Settings", Settings],
 ] as const;
 
-export function AdminSidebarNav() {
+export function AdminSidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -38,7 +40,7 @@ export function AdminSidebarNav() {
           <button
             type="button"
             key={href}
-            onClick={() => router.push(href)}
+            onClick={() => { onNavigate?.(); router.push(href); }}
             className={isActive ? "active" : ""}
           >
             <Icon size={18} />

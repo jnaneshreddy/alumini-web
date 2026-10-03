@@ -7,7 +7,9 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowDown, ArrowRight, ChevronLeft, ChevronRight, MapPin, Menu, Pause, Play, X } from "lucide-react";
 import { FeedbackForm } from "@/components/feedback-form";
 import { HomepageGallery } from "@/components/gallery-experience";
+import { TeacherShowcase } from "@/components/teacher-archive";
 import type { PublicGalleryImage } from "@/lib/gallery";
+import type { PublicTeacher } from "@/lib/teachers";
 import { publicMessages, type PublicLocale } from "@/lib/public-i18n";
 
 export type PublicSlide = { id: string; title: string; caption: string | null; imagePath: string; altText: string };
@@ -19,10 +21,12 @@ type Props = {
   notices: PublicNotice[];
   events: PublicEvent[];
   gallery: PublicGalleryImage[];
+  teachers: PublicTeacher[];
+  hasMoreTeachers: boolean;
   unavailable: boolean;
 };
 
-const navTargets = ["home", "story", "highlights", "events", "announcements", "gallery", "feedback"] as const;
+const navTargets = ["home", "story", "highlights", "events", "announcements", "teachers", "gallery", "feedback"] as const;
 
 function useLocale() {
   const [locale, setLocale] = useState<PublicLocale>("en");
@@ -60,16 +64,16 @@ function Header({ locale, setLocale }: { locale: PublicLocale; setLocale: (local
     document.body.style.overflow = open ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [open]);
-  const label: Record<(typeof navTargets)[number], string> = { home: t.home, story: t.story, highlights: t.highlights, events: t.events, announcements: t.announcements, gallery: t.gallery, feedback: t.feedback };
+  const label: Record<(typeof navTargets)[number], string> = { home: t.home, story: t.story, highlights: t.highlights, events: t.events, announcements: t.announcements, teachers: t.teachers, gallery: t.gallery, feedback: t.feedback };
   const close = () => setOpen(false);
   return <>
     <a className="heritage-skip" href="#main-content">{t.skip}</a>
     <header className={`heritage-header ${compact ? "is-compact" : ""}`}>
       <a className="heritage-brand" href="#home" aria-label={`${t.school} ${t.home}`}><span aria-hidden="true">M</span><span><strong>{t.school}</strong><small>{t.alumni}</small></span></a>
-      <nav className="heritage-desktop-nav" aria-label="Primary navigation">{navTargets.map((target) => <a key={target} href={`#${target}`}>{label[target]}</a>)}<Link className="heritage-join-link" href="/join">Join community</Link></nav>
+      <nav className="heritage-desktop-nav" aria-label="Primary navigation">{navTargets.map((target) => target === "teachers" ? <Link key={target} href="/teachers">{label[target]}</Link> : <a key={target} href={`#${target}`}>{label[target]}</a>)}<Link className="heritage-join-link" href="/join">Join community</Link></nav>
       <div className="heritage-header-actions"><LanguageSwitch locale={locale} setLocale={setLocale}/><button className="heritage-menu-button" type="button" onClick={() => setOpen(true)} aria-label={t.openMenu} aria-expanded={open}><Menu size={21}/></button></div>
     </header>
-    <AnimatePresence>{open && <motion.div className="heritage-drawer" role="dialog" aria-modal="true" aria-label={t.openMenu} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: .35, ease: [0.22, 1, 0.36, 1] }}><div className="drawer-top"><span>{t.alumni}</span><button type="button" onClick={close} aria-label={t.closeMenu}><X/></button></div><nav>{navTargets.map((target, index) => <a key={target} href={`#${target}`} onClick={close}><span>{String(index + 1).padStart(2, "0")}</span>{label[target]}</a>)}<Link href="/join" onClick={close}><span>08</span>Join community</Link></nav><div className="drawer-language"><span>{t.language}</span><LanguageSwitch locale={locale} setLocale={setLocale}/></div></motion.div></motion.div>}</AnimatePresence>
+    <AnimatePresence>{open && <motion.div className="heritage-drawer" role="dialog" aria-modal="true" aria-label={t.openMenu} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}><motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ duration: .35, ease: [0.22, 1, 0.36, 1] }}><div className="drawer-top"><span>{t.alumni}</span><button type="button" onClick={close} aria-label={t.closeMenu}><X/></button></div><nav>{navTargets.map((target, index) => target === "teachers" ? <Link key={target} href="/teachers" onClick={close}><span>{String(index + 1).padStart(2, "0")}</span>{label[target]}</Link> : <a key={target} href={`#${target}`} onClick={close}><span>{String(index + 1).padStart(2, "0")}</span>{label[target]}</a>)}<Link href="/join" onClick={close}><span>09</span>Join community</Link></nav><div className="drawer-language"><span>{t.language}</span><LanguageSwitch locale={locale} setLocale={setLocale}/></div></motion.div></motion.div>}</AnimatePresence>
   </>;
 }
 
@@ -102,7 +106,7 @@ function Hero({ slides, locale }: { slides: PublicSlide[]; locale: PublicLocale 
     <div className="hero-media" aria-live="off">
       <AnimatePresence mode="wait">
         <motion.div className="hero-frame" key={current?.id ?? "empty"} initial={reduceMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={reduceMotion ? undefined : { opacity: 0 }} transition={{ duration: reduceMotion ? 0 : .8 }}>
-          {current && !failed[current.id] ? <Image src={current.imagePath} alt={current.altText} fill priority={index === 0} sizes="100vw" onError={() => setFailed((value) => ({ ...value, [current.id]: true }))}/> : <div className="hero-archive-placeholder"><span>MDRS</span><p>{t.imageUnavailable}</p></div>}
+          {current && !failed[current.id] ? <Image className="media-cover" src={current.imagePath} alt={current.altText} fill priority={index === 0} sizes="100vw" onError={() => setFailed((value) => ({ ...value, [current.id]: true }))}/> : <div className="hero-archive-placeholder"><span>MDRS</span><p>{t.imageUnavailable}</p></div>}
         </motion.div>
       </AnimatePresence>
     </div>
@@ -136,7 +140,7 @@ function Events({ events, locale }: { events: PublicEvent[]; locale: PublicLocal
   const t = publicMessages[locale];
   const now = useMemo(() => new Date(), []);
   const ordered = useMemo(() => [...events].sort((a, b) => new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime()), [events]);
-  return <section id="events" className="heritage-events"><Reveal className="section-intro"><p className="heritage-eyebrow">{t.eventsKicker}</p><h2>{t.eventsTitle}</h2></Reveal>{ordered.length ? <ol className="event-timeline">{ordered.map((event, index) => { const date = new Date(event.eventDate); const upcoming = date >= now; const title = locale === "kn" && event.titleKn ? event.titleKn : event.title; const description = locale === "kn" && event.descriptionKn ? event.descriptionKn : event.description; const venue = locale === "kn" && event.venueKn ? event.venueKn : event.venue; return <motion.li key={event.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .25 }} transition={{ delay: Math.min(index * .08, .3) }}><div className="event-node"><span/></div><article><div className="event-date"><b>{date.toLocaleDateString(locale === "kn" ? "kn-IN" : "en-IN", { day: "2-digit" })}</b><span>{date.toLocaleDateString(locale === "kn" ? "kn-IN" : "en-IN", { month: "short", year: "numeric" })}</span></div><div className="event-copy"><p className={upcoming ? "upcoming" : "past"}>{upcoming ? t.upcoming : t.past}</p><h3>{title}</h3>{description && <p>{description}</p>}<small><MapPin size={15}/>{venue || t.locationPending}</small></div>{event.imagePath && <div className="event-image"><Image src={event.imagePath} alt="" fill sizes="(max-width: 720px) 100vw, 34vw"/></div>}</article></motion.li>; })}</ol> : <div className="heritage-empty"><span>—</span><h3>{t.noEvents}</h3><p>{t.noEventsCopy}</p></div>}</section>;
+  return <section id="events" className="heritage-events"><Reveal className="section-intro"><p className="heritage-eyebrow">{t.eventsKicker}</p><h2>{t.eventsTitle}</h2></Reveal>{ordered.length ? <ol className="event-timeline">{ordered.map((event, index) => { const date = new Date(event.eventDate); const upcoming = date >= now; const title = locale === "kn" && event.titleKn ? event.titleKn : event.title; const description = locale === "kn" && event.descriptionKn ? event.descriptionKn : event.description; const venue = locale === "kn" && event.venueKn ? event.venueKn : event.venue; return <motion.li key={event.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .25 }} transition={{ delay: Math.min(index * .08, .3) }}><div className="event-node"><span/></div><article><div className="event-date"><b>{date.toLocaleDateString(locale === "kn" ? "kn-IN" : "en-IN", { day: "2-digit" })}</b><span>{date.toLocaleDateString(locale === "kn" ? "kn-IN" : "en-IN", { month: "short", year: "numeric" })}</span></div><div className="event-copy"><p className={upcoming ? "upcoming" : "past"}>{upcoming ? t.upcoming : t.past}</p><h3>{title}</h3>{description && <p>{description}</p>}<small><MapPin size={15}/>{venue || t.locationPending}</small></div>{event.imagePath && <div className="event-image"><Image className="media-cover" src={event.imagePath} alt="" fill sizes="(max-width: 720px) 100vw, 34vw"/></div>}</article></motion.li>; })}</ol> : <div className="heritage-empty"><span>—</span><h3>{t.noEvents}</h3><p>{t.noEventsCopy}</p></div>}</section>;
 }
 
 function Announcements({ notices, locale }: { notices: PublicNotice[]; locale: PublicLocale }) {
@@ -149,7 +153,7 @@ function Footer({ locale, setLocale }: { locale: PublicLocale; setLocale: (local
   return <footer className="heritage-footer"><div><p className="heritage-eyebrow light">{t.established}</p><h2>{t.school}</h2><p>{t.footerLine}</p></div><address>{t.address}</address><nav aria-label="Footer navigation"><a href="#story">{t.story}</a><a href="#events">{t.events}</a><a href="#announcements">{t.announcements}</a><a href="#feedback">{t.feedback}</a><Link href="/join">Join community</Link><Link href="/admin/login">{t.admin}</Link></nav><div className="footer-base"><span>© {new Date().getFullYear()} {t.rights}</span><LanguageSwitch locale={locale} setLocale={setLocale}/></div></footer>;
 }
 
-export function PublicHome({ slides, notices, events, gallery, unavailable }: Props) {
+export function PublicHome({ slides, notices, events, gallery, teachers, hasMoreTeachers, unavailable }: Props) {
   const { locale, changeLocale, t } = useLocale();
-  return <main id="main-content" className={`heritage-site locale-${locale}`}><Header locale={locale} setLocale={changeLocale}/>{unavailable && <div className="heritage-service-note" role="status">{locale === "kn" ? "ನೇರ ಪ್ರಕಟಣೆಗಳು ತಾತ್ಕಾಲಿಕವಾಗಿ ಲಭ್ಯವಿಲ್ಲ." : "Live updates are temporarily unavailable."}</div>}<Hero slides={slides} locale={locale}/><Story locale={locale}/><Highlights locale={locale}/><Events events={events} locale={locale}/><Announcements notices={notices} locale={locale}/><HomepageGallery images={gallery} locale={locale}/><FeedbackForm locale={locale} messages={t}/><Footer locale={locale} setLocale={changeLocale}/></main>;
+  return <main id="main-content" className={`heritage-site locale-${locale}`}><Header locale={locale} setLocale={changeLocale}/>{unavailable && <div className="heritage-service-note" role="status">{locale === "kn" ? "ನೇರ ಪ್ರಕಟಣೆಗಳು ತಾತ್ಕಾಲಿಕವಾಗಿ ಲಭ್ಯವಿಲ್ಲ." : "Live updates are temporarily unavailable."}</div>}<Hero slides={slides} locale={locale}/><Story locale={locale}/><Highlights locale={locale}/><Events events={events} locale={locale}/><Announcements notices={notices} locale={locale}/><TeacherShowcase teachers={teachers} locale={locale} showAllLink={hasMoreTeachers}/><HomepageGallery images={gallery} locale={locale}/><FeedbackForm locale={locale} messages={t}/><Footer locale={locale} setLocale={changeLocale}/></main>;
 }

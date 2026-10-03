@@ -6,6 +6,7 @@ import { notifyAdmins } from "@/lib/admin-notifications";
 import { prisma } from "@/lib/prisma";
 import { adminRoles, requireRole } from "@/lib/permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { canChangeManagedUserRole, canChangeManagedUserStatus, canDeleteManagedUser } from "@/lib/user-role-policy";
 
 export type UserActionResult = { ok: boolean; message: string };
 const roles: Role[] = ["USER", "ADMIN", "SUPER_ADMIN"];
@@ -21,8 +22,8 @@ export async function changeUserRole(formData: FormData): Promise<UserActionResu
   const target = await prisma.userProfile.findUnique({ where: { id: targetId } });
   if (!target) return { ok: false, message: "User not found." };
   if (target.id === actor.id) return { ok: false, message: "You cannot change your own role." };
-  if (actor.role === "ADMIN" && (target.role === "SUPER_ADMIN" || requested === "SUPER_ADMIN")) return { ok: false, message: "You do not have permission to perform this action." };
-  if (target.role === "SUPER_ADMIN" && requested !== "SUPER_ADMIN") {
+  if (!canChangeManagedUserRole(actor.role, target.role, requested)) return { ok: false, message: "You do not have permission to perform this action." };
+  if (target.active && target.role === "SUPER_ADMIN" && requested !== "SUPER_ADMIN") {
     const superAdmins = await prisma.userProfile.count({ where: { role: "SUPER_ADMIN", active: true } });
     if (superAdmins <= 1) return { ok: false, message: "The final active Super Admin cannot be demoted." };
   }
@@ -43,7 +44,7 @@ export async function setUserActive(formData: FormData): Promise<UserActionResul
   const target = await prisma.userProfile.findUnique({ where: { id: targetId } });
   if (!target) return { ok: false, message: "User not found." };
   if (target.id === actor.id) return { ok: false, message: "You cannot deactivate your own account." };
-  if (actor.role === "ADMIN" && target.role === "SUPER_ADMIN") return { ok: false, message: "You do not have permission to perform this action." };
+  if (!canChangeManagedUserStatus(actor.role, target.role)) return { ok: false, message: "You do not have permission to perform this action." };
   if (!active && target.role === "SUPER_ADMIN") {
     const superAdmins = await prisma.userProfile.count({ where: { role: "SUPER_ADMIN", active: true } });
     if (superAdmins <= 1) return { ok: false, message: "The final active Super Admin cannot be deactivated." };
@@ -56,6 +57,51 @@ export async function setUserActive(formData: FormData): Promise<UserActionResul
   refreshUsers();
   await notifyAdmins({ title: active ? "User reactivated" : "User deactivated", message: `${actor.fullName} ${active ? "reactivated" : "deactivated"} ${target.fullName}.`, topic: "ACCESS", href: "/admin/users", excludeUserId: actor.id });
   return { ok: true, message: `${target.fullName} is now ${active ? "active" : "deactivated"}.` };
+}
+
+export async function deleteManagedUser(formData: FormData): Promise<UserActionResult> {
+  const actor = await requireRole(...adminRoles);
+  const targetId = text(formData, "userId");
+  const confirmationEmail = text(formData, "confirmationEmail").toLowerCase();
+  const target = await prisma.userProfile.findUnique({ where: { id: targetId } });
+  if (!target) return { ok: false, message: "User not found." };
+  if (target.id === actor.id) return { ok: false, message: "You cannot permanently delete your own account." };
+  if (!canDeleteManagedUser(actor.role, target.role)) return { ok: false, message: "You do not have permission to delete this account." };
+  if (confirmationEmail !== target.email.toLowerCase()) return { ok: false, message: "Enter the user's complete email address to confirm permanent deletion." };
+  if (target.active && target.role === "SUPER_ADMIN") {
+    const superAdmins = await prisma.userProfile.count({ where: { role: "SUPER_ADMIN", active: true } });
+    if (superAdmins <= 1) return { ok: false, message: "The final active Super Admin cannot be deleted." };
+  }
+
+  const authResult = await createAdminClient().auth.admin.deleteUser(target.authUserId, false);
+  if (authResult.error) return { ok: false, message: `Unable to remove the authentication account: ${authResult.error.message}` };
+
+  try {
+    await prisma.$transaction([
+      prisma.auditLog.create({
+        data: {
+          userId: actor.id,
+          action: "USER_PERMANENTLY_DELETED",
+          entityType: "UserProfile",
+          entityId: target.id,
+          oldData: { email: target.email, fullName: target.fullName, role: target.role, active: target.active, authUserId: target.authUserId },
+        },
+      }),
+      prisma.userProfile.delete({ where: { id: target.id } }),
+    ]);
+  } catch (error) {
+    console.error("Authentication account was deleted but profile cleanup failed", error);
+    try { await prisma.userProfile.update({ where: { id: target.id }, data: { active: false } }); } catch { /* Preserve the original cleanup error. */ }
+    return { ok: false, message: "The sign-in account was removed, but database cleanup needs administrator attention. The remaining profile has been deactivated." };
+  }
+
+  refreshUsers();
+  try {
+    await notifyAdmins({ title: "User permanently deleted", message: `${actor.fullName} permanently deleted ${target.fullName}'s account.`, topic: "ACCESS", href: "/admin/users", excludeUserId: actor.id });
+  } catch (error) {
+    console.error("Unable to send user-deletion notification", error);
+  }
+  return { ok: true, message: `${target.fullName}'s account was permanently deleted.` };
 }
 
 export async function createManagedUser(formData: FormData): Promise<UserActionResult> {

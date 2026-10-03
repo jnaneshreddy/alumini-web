@@ -1,0 +1,19 @@
+/* Shared sizing contract for every upload-backed image frame. */
+.media-cover,
+.media-contain {
+  width: 100% !important;
+  height: 100% !important;
+  object-position: center;
+}
+
+.media-cover {
+  object-fit: cover;
+}
+
+.media-contain {
+  object-fit: contain;
+}
+
+.media-portrait {
+  object-position: 50% 20%;
+}
