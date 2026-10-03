@@ -1,0 +1,9 @@
+﻿"use server";
+import { revalidatePath } from "next/cache";
+import { TransactionType } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
+import { financeRoles, requireRole } from "@/lib/permissions";
+const text=(f:FormData,n:string)=>String(f.get(n)??"").trim();
+export async function createFinancialYear(formData:FormData){await requireRole(...financeRoles);const enteredName=text(formData,"name");const digits=enteredName.replace(/\D/g,"");if(!/^\d{6}$/.test(digits))return;const name=`${digits.slice(0,4)}-${digits.slice(4)}`;await prisma.financialYear.create({data:{name,startDate:new Date(text(formData,"startDate")),endDate:new Date(text(formData,"endDate")),openingBalance:text(formData,"openingBalance")||"0",isCurrent:formData.get("isCurrent")==="on"}});revalidatePath("/admin/finance")}
+export async function createCategory(formData:FormData){await requireRole(...financeRoles);await prisma.financialCategory.upsert({where:{name:text(formData,"name")},update:{type:text(formData,"type") as TransactionType},create:{name:text(formData,"name"),type:text(formData,"type") as TransactionType}});revalidatePath("/admin/finance")}
+export async function createTransaction(formData:FormData){const user=await requireRole(...financeRoles);const amount=text(formData,"amount");if(!/^\d+(\.\d{1,2})?$/.test(amount))throw new Error("Enter a valid amount");await prisma.financialTransaction.create({data:{financialYearId:text(formData,"financialYearId"),categoryId:text(formData,"categoryId"),eventId:text(formData,"eventId")||null,createdById:user.id,type:text(formData,"type") as TransactionType,date:new Date(text(formData,"date")),particulars:text(formData,"particulars"),amount,paymentMethod:text(formData,"paymentMethod")||null,referenceNumber:text(formData,"referenceNumber")||null,notes:text(formData,"notes")||null}});revalidatePath("/admin/finance")}

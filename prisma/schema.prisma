@@ -1,0 +1,198 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  TREASURER
+  SECRETARY
+  EDITOR
+  VIEWER
+}
+
+enum PublishStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum EventStatus {
+  UPCOMING
+  COMPLETED
+  CANCELLED
+}
+
+model UserProfile {
+  id           String                 @id @default(uuid())
+  authUserId   String                 @unique
+  email        String                 @unique
+  fullName     String
+  role         Role                   @default(VIEWER)
+  active       Boolean                @default(true)
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  transactions FinancialTransaction[]
+  auditLogs    AuditLog[]
+
+  @@map("user_profiles")
+}
+
+model CarouselSlide {
+  id        String        @id @default(uuid())
+  title     String
+  caption   String?
+  imagePath String
+  altText   String
+  position  Int           @default(0)
+  status    PublishStatus @default(DRAFT)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([status, position])
+  @@map("carousel_slides")
+}
+
+model Announcement {
+  id          String        @id @default(uuid())
+  title       String
+  titleKn     String?
+  body        String
+  bodyKn      String?
+  priority    String        @default("GENERAL")
+  status      PublishStatus @default(DRAFT)
+  publishedAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([status, publishedAt])
+  @@map("announcements")
+}
+
+model Event {
+  id            String                 @id @default(uuid())
+  title         String
+  titleKn       String?
+  description   String?
+  descriptionKn String?
+  eventDate     DateTime
+  startTime     String?
+  endTime       String?
+  venue         String?
+  venueKn       String?
+  imagePath     String?
+  status        EventStatus            @default(UPCOMING)
+  publication   PublishStatus          @default(DRAFT)
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  transactions  FinancialTransaction[]
+
+  @@index([eventDate, publication])
+  @@map("events")
+}
+
+model FinancialYear {
+  id             String                 @id @default(uuid())
+  name           String                 @unique
+  startDate      DateTime
+  endDate        DateTime
+  openingBalance Decimal                @default(0) @db.Decimal(14, 2)
+  isCurrent      Boolean                @default(false)
+  createdAt      DateTime               @default(now())
+  transactions   FinancialTransaction[]
+  documents      Document[]
+
+  @@index([isCurrent])
+  @@map("financial_years")
+}
+
+model FinancialCategory {
+  id           String                 @id @default(uuid())
+  name         String                 @unique
+  type         TransactionType?
+  active       Boolean                @default(true)
+  transactions FinancialTransaction[]
+
+  @@map("financial_categories")
+}
+
+model FinancialTransaction {
+  id              String            @id @default(uuid())
+  financialYearId String
+  categoryId      String
+  eventId         String?
+  createdById     String
+  type            TransactionType
+  date            DateTime
+  particulars     String
+  amount          Decimal           @db.Decimal(14, 2)
+  paymentMethod   String?
+  referenceNumber String?
+  notes           String?
+  documentPath    String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  financialYear   FinancialYear     @relation(fields: [financialYearId], references: [id], onDelete: Restrict)
+  category        FinancialCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  event           Event?            @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  createdBy       UserProfile       @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([financialYearId, date])
+  @@index([eventId])
+  @@index([type])
+  @@map("financial_transactions")
+}
+
+model Document {
+  id              String         @id @default(uuid())
+  name            String
+  description     String?
+  storagePath     String         @unique
+  financialYearId String?
+  uploadedAt      DateTime       @default(now())
+  financialYear   FinancialYear? @relation(fields: [financialYearId], references: [id], onDelete: SetNull)
+
+  @@map("documents")
+}
+
+model AuditLog {
+  id         String       @id @default(uuid())
+  userId     String?
+  action     String
+  entityType String
+  entityId   String?
+  oldData    Json?
+  newData    Json?
+  createdAt  DateTime     @default(now())
+  user       UserProfile? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model Feedback {
+  id           String   @id @default(uuid())
+  referenceId  String   @unique
+  fullName     String
+  email        String
+  batch        String
+  alumniType   String
+  feedbackType String
+  subject      String?
+  message      String
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("feedback")
+}
