@@ -16,9 +16,11 @@ export function AnnouncementStudio({ announcements }: { announcements: Announcem
   const selected = useMemo(() => announcements.find((entry) => entry.id === selectedId) ?? null, [announcements, selectedId]);
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const form = event.currentTarget;
+    const data = new FormData(form);
     setBusy(true);
     setMessage("");
-    const result = await saveAnnouncement(new FormData(event.currentTarget));
+    const result = await saveAnnouncement(data);
     setBusy(false);
     setMessage(result.message);
     setMessageOk(result.ok);

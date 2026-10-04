@@ -10,6 +10,7 @@ import "./users/users.css";
 import "./users/management.css";
 import "./gallery/gallery.css";
 import "./teachers/teachers.css";
+import "./mcl/mcl.css";
 import "./redesign.css";
 import "./contrast-fixes.css";
 import "./workspaces.css";

@@ -5,6 +5,7 @@ import "./image-fit.css";
 import "./redesign.css";
 import "./gallery.css";
 import "./teachers.css";
+import "./mcl.css";
 
 const sans = Geist({ subsets: ["latin"], variable: "--font-sans" });
 const serif = Lora({ subsets: ["latin"], variable: "--font-serif" });

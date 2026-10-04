@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Check, Grid2X2, ImagePlus, List, LoaderCircle, Pencil, Save, Trash2, UploadCloud, X } from "lucide-react";
 import { deleteGalleryImage, updateGalleryImage, uploadGalleryImage } from "@/app/admin/gallery/actions";
 import { galleryCategories, galleryCategoryLabels } from "@/lib/gallery";
@@ -20,7 +20,10 @@ export function GalleryStudio({ images, events, defaultType }: { images: Gallery
   const [view, setView] = useState<"grid" | "list">("grid");
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
+  const queueRef = useRef(queue);
   const selected = useMemo(() => images.find((image) => image.id === selectedId) || null, [images, selectedId]);
+  useEffect(() => { queueRef.current = queue; }, [queue]);
+  useEffect(() => () => { queueRef.current.forEach((item) => URL.revokeObjectURL(item.preview)); }, []);
   useEffect(() => {
     if (!selectedId) return;
     const previousOverflow = document.body.style.overflow;
@@ -37,9 +40,10 @@ export function GalleryStudio({ images, events, defaultType }: { images: Gallery
   const removeQueue = (key: string) => setQueue((current) => { const item = current.find((entry) => entry.key === key); if (item) URL.revokeObjectURL(item.preview); return current.filter((entry) => entry.key !== key); });
   const upload = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const form = event.currentTarget;
     if (!queue.length) { setMessage("Choose one or more JPG, PNG or WEBP images."); return; }
     setSaving(true); setMessage("");
-    const base = new FormData(event.currentTarget);
+    const base = new FormData(form);
     for (const item of queue) {
       if (item.status === "success") continue;
       setQueue((current) => current.map((entry) => entry.key === item.key ? { ...entry, status: "uploading", message: undefined } : entry));
@@ -51,7 +55,7 @@ export function GalleryStudio({ images, events, defaultType }: { images: Gallery
     }
     setSaving(false); setMessage("Upload queue finished. Failed files can be removed or retried."); router.refresh();
   };
-  const update = async (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); setSaving(true); const result = await updateGalleryImage(new FormData(event.currentTarget)); setMessage(result.ok ? "Photo details updated successfully. You can now edit another photo." : result.message); setSaving(false); if (result.ok) { setSelectedId(null); router.refresh(); } };
+  const update = async (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); const form = event.currentTarget; const data = new FormData(form); setSaving(true); const result = await updateGalleryImage(data); setMessage(result.ok ? "Photo details updated successfully. You can now edit another photo." : result.message); setSaving(false); if (result.ok) { setSelectedId(null); router.refresh(); } };
   const remove = async (image: GalleryAdminImage) => { if (!window.confirm(`Delete ${image.titleEn || "this photo"}?\n\nDeleting this photo will remove it from the public gallery.`)) return; const payload = new FormData(); payload.set("id", image.id); const result = await deleteGalleryImage(payload); setMessage(result.message); if (result.ok) { setSelectedId(null); router.refresh(); } };
   return <div className="galleryStudio">
     <section className="studioIntro"><div><p className="adminKicker">DIGITAL SCHOOL ARCHIVE</p><h1>{defaultType === "MEMORY" ? "Memories" : "Photo gallery"}</h1><p>Upload, document and publish photographs without duplicating the underlying media library.</p></div><div className="studioCount"><ImagePlus size={18}/><span>{images.length}</span><small>records</small></div></section>

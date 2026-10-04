@@ -19,8 +19,8 @@ export function SettingsWorkspace({ settings }: { settings: SettingsRecord | nul
   const [message, setMessage] = useState("");
   const [ok, setOk] = useState(false);
   const submit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); setBusy(true); setMessage("");
-    const result = await saveSiteSettings(new FormData(event.currentTarget));
+    event.preventDefault(); const form = event.currentTarget; const data = new FormData(form); setBusy(true); setMessage("");
+    const result = await saveSiteSettings(data);
     setBusy(false); setMessage(result.message); setOk(result.ok);
     if (result.ok) router.refresh();
   };

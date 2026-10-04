@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { CheckCircle2, ImagePlus, LoaderCircle, Pencil, Save, Trash2, UploadCloud } from "lucide-react";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { deleteCarouselSlide, saveCarouselSlide } from "@/app/admin/carousel/actions";
 
@@ -16,8 +16,9 @@ export function CarouselStudio({ slides }: { slides: CarouselSlideRecord[] }) {
   const [message, setMessage] = useState("");
   const [messageOk, setMessageOk] = useState(false);
   const selected = useMemo(() => slides.find((slide) => slide.id === selectedId) ?? null, [selectedId, slides]);
+  useEffect(() => () => { if (filePreview) URL.revokeObjectURL(filePreview); }, [filePreview]);
   const resetEditor = () => { setSelectedId(null); setFilePreview(null); };
-  const submit = async (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); setBusy(true); setMessage(""); const result = await saveCarouselSlide(new FormData(event.currentTarget)); setBusy(false); setMessage(result.message); setMessageOk(result.ok); if (result.ok) { resetEditor(); router.refresh(); } };
+  const submit = async (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); const form = event.currentTarget; const data = new FormData(form); setBusy(true); setMessage(""); const result = await saveCarouselSlide(data); setBusy(false); setMessage(result.message); setMessageOk(result.ok); if (result.ok) { form.reset(); resetEditor(); router.refresh(); } };
   return <div className="mediaStudio">
     <section className="studioIntro"><div><p className="adminKicker">CONTENT LIBRARY</p><h1>Carousel media</h1><p>Curate the visual story shown on the public homepage.</p></div><div className="studioCount"><ImagePlus size={18} /><span>{slides.length}</span><small>slides</small></div></section>
     <div className="studioGrid">

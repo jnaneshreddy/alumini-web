@@ -58,27 +58,37 @@ enum AlumniRegistrantType {
   TEACHER
 }
 
+enum MclSeasonStatus {
+  PLANNED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
 model UserProfile {
-  id              String                 @id @default(uuid())
-  authUserId      String                 @unique
-  email           String                 @unique
-  fullName        String
-  role            Role                   @default(USER)
-  active          Boolean                @default(true)
-  phone           String?
-  batch           String?
-  avatarUrl       String?
-  createdAt       DateTime               @default(now())
-  updatedAt       DateTime               @updatedAt
-  transactions    FinancialTransaction[]
-  auditLogs       AuditLog[]
-  galleryImages   GalleryImage[]
-  alumniCreated   AlumniProfile[]        @relation("AlumniCreatedBy")
-  alumniVerified  AlumniProfile[]        @relation("AlumniVerifiedBy")
-  notifications   AdminNotification[]
-  settingsUpdates SiteSettings[]         @relation("SettingsUpdatedBy")
-  teachersCreated Teacher[]              @relation("TeacherCreatedBy")
-  teachersUpdated Teacher[]              @relation("TeacherUpdatedBy")
+  id                String                 @id @default(uuid())
+  authUserId        String                 @unique
+  email             String                 @unique
+  fullName          String
+  role              Role                   @default(USER)
+  active            Boolean                @default(true)
+  phone             String?
+  batch             String?
+  avatarUrl         String?
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+  transactions      FinancialTransaction[]
+  auditLogs         AuditLog[]
+  galleryImages     GalleryImage[]
+  alumniCreated     AlumniProfile[]        @relation("AlumniCreatedBy")
+  alumniVerified    AlumniProfile[]        @relation("AlumniVerifiedBy")
+  notifications     AdminNotification[]
+  settingsUpdates   SiteSettings[]         @relation("SettingsUpdatedBy")
+  teachersCreated   Teacher[]              @relation("TeacherCreatedBy")
+  teachersUpdated   Teacher[]              @relation("TeacherUpdatedBy")
+  mclSeasonsCreated MclSeason[]            @relation("MclSeasonCreatedBy")
+  mclSeasonsUpdated MclSeason[]            @relation("MclSeasonUpdatedBy")
+  mclMemories       MclMemory[]            @relation("MclMemoryUploadedBy")
 
   @@map("user_profiles")
 }
@@ -105,6 +115,7 @@ model AlumniProfile {
   updatedAt          DateTime                 @updatedAt
   createdBy          UserProfile?             @relation("AlumniCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   verifiedBy         UserProfile?             @relation("AlumniVerifiedBy", fields: [verifiedById], references: [id], onDelete: SetNull)
+  mclPlayers         MclPlayer[]
 
   @@index([batch, verificationStatus])
   @@index([isPublished, verificationStatus])
@@ -252,6 +263,162 @@ model Teacher {
 
   @@index([isPublished, isCurrent, endYear, startYear])
   @@map("teachers")
+}
+
+model MclSeason {
+  id                 String          @id @default(uuid())
+  year               Int             @unique
+  titleEn            String
+  titleKn            String?
+  descriptionEn      String?
+  descriptionKn      String?
+  detailedEn         String?
+  detailedKn         String?
+  coverImageUrl      String?
+  coverStoragePath   String?         @unique
+  logoUrl            String?
+  logoStoragePath    String?         @unique
+  startDate          DateTime?
+  endDate            DateTime?
+  venueEn            String?
+  venueKn            String?
+  status             MclSeasonStatus @default(PLANNED)
+  isPublished        Boolean         @default(false)
+  verifiedStatistics Json?
+  championTeamId     String?
+  runnerUpTeamId     String?
+  thirdPlaceTeamId   String?
+  createdById        String?
+  updatedById        String?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  teams              MclTeam[]       @relation("MclSeasonTeams")
+  rosters            MclRoster[]
+  awards             MclAward[]
+  memories           MclMemory[]
+  championTeam       MclTeam?        @relation("MclChampion", fields: [championTeamId], references: [id], onDelete: SetNull)
+  runnerUpTeam       MclTeam?        @relation("MclRunnerUp", fields: [runnerUpTeamId], references: [id], onDelete: SetNull)
+  thirdPlaceTeam     MclTeam?        @relation("MclThirdPlace", fields: [thirdPlaceTeamId], references: [id], onDelete: SetNull)
+  createdBy          UserProfile?    @relation("MclSeasonCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy          UserProfile?    @relation("MclSeasonUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([isPublished, year])
+  @@map("mcl_seasons")
+}
+
+model MclTeam {
+  id              String      @id @default(uuid())
+  seasonId        String
+  nameEn          String
+  nameKn          String?
+  descriptionEn   String?
+  descriptionKn   String?
+  captain         String?
+  logoUrl         String?
+  logoStoragePath String?     @unique
+  finalPosition   Int?
+  matchesPlayed   Int?
+  wins            Int?
+  losses          Int?
+  points          Int?
+  runs            Int?
+  wickets         Int?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  season          MclSeason   @relation("MclSeasonTeams", fields: [seasonId], references: [id], onDelete: Cascade)
+  rosters         MclRoster[]
+  awards          MclAward[]
+  championOf      MclSeason[] @relation("MclChampion")
+  runnerUpOf      MclSeason[] @relation("MclRunnerUp")
+  thirdPlaceOf    MclSeason[] @relation("MclThirdPlace")
+
+  @@unique([seasonId, nameEn])
+  @@index([seasonId, finalPosition])
+  @@map("mcl_teams")
+}
+
+model MclPlayer {
+  id               String         @id @default(uuid())
+  nameEn           String
+  nameKn           String?
+  photoUrl         String?
+  photoStoragePath String?        @unique
+  alumniProfileId  String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  alumniProfile    AlumniProfile? @relation(fields: [alumniProfileId], references: [id], onDelete: SetNull)
+  rosters          MclRoster[]
+  awards           MclAward[]
+
+  @@index([nameEn])
+  @@index([alumniProfileId])
+  @@map("mcl_players")
+}
+
+model MclRoster {
+  id           String    @id @default(uuid())
+  seasonId     String
+  teamId       String
+  playerId     String
+  jerseyNumber Int?
+  role         String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  season       MclSeason @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  team         MclTeam   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  player       MclPlayer @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([seasonId, playerId])
+  @@index([teamId])
+  @@map("mcl_rosters")
+}
+
+model MclAward {
+  id               String     @id @default(uuid())
+  seasonId         String
+  awardNameEn      String
+  awardNameKn      String?
+  descriptionEn    String?
+  descriptionKn    String?
+  playerId         String?
+  teamId           String?
+  statistics       Json?
+  awardImageUrl    String?
+  awardStoragePath String?    @unique
+  isPublished      Boolean    @default(true)
+  sortOrder        Int        @default(0)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  season           MclSeason  @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  player           MclPlayer? @relation(fields: [playerId], references: [id], onDelete: SetNull)
+  team             MclTeam?   @relation(fields: [teamId], references: [id], onDelete: SetNull)
+
+  @@index([seasonId, isPublished, sortOrder])
+  @@map("mcl_awards")
+}
+
+model MclMemory {
+  id           String       @id @default(uuid())
+  seasonId     String
+  imageUrl     String
+  storagePath  String       @unique
+  captionEn    String?
+  captionKn    String?
+  altText      String
+  category     String       @default("MEMORIES")
+  date         DateTime?
+  isFeatured   Boolean      @default(false)
+  isPublished  Boolean      @default(false)
+  sortOrder    Int          @default(0)
+  uploadedById String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  season       MclSeason    @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  uploadedBy   UserProfile? @relation("MclMemoryUploadedBy", fields: [uploadedById], references: [id], onDelete: SetNull)
+
+  @@index([seasonId, isPublished, sortOrder])
+  @@index([category])
+  @@map("mcl_memories")
 }
 
 model FinancialYear {
