@@ -7,3 +7,4 @@
 
 @media(max-width:900px){.alumniMetrics{grid-template-columns:repeat(2,1fr)}.settingsGrid{grid-template-columns:1fr}.settingsFooter{grid-column:auto}.alumniTable{overflow-x:auto}.alumniTable table{min-width:800px}}
 @media(max-width:600px){.notificationPopover{position:fixed;top:70px;right:12px;left:12px;width:auto}.alumniFormGrid,.alumniConsent,.settingsFields>div{grid-template-columns:1fr}.alumniFormGrid label.wide{grid-column:auto}.settingsStatus{width:100%}.settingsFooter{align-items:stretch;flex-direction:column}.settingsFooter button{justify-content:center}}
+.notificationLoadError{margin:0 18px 12px;padding:9px 10px;border:1px solid #e6c9a0;border-radius:7px;background:#fff8e9;color:#7c5a2a;font-size:10px;line-height:1.4}

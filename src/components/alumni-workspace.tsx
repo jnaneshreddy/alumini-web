@@ -54,9 +54,11 @@ export function AlumniWorkspace({ records }: { records: AlumniRecord[] }) {
   const openEditor = (record: AlumniRecord | null) => { setSelected(record); setEditorOpen(true); setMessage(""); };
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const form = event.currentTarget;
+    const data = new FormData(form);
     setBusy(true);
     setMessage("");
-    const result = await saveAlumniProfile(new FormData(event.currentTarget));
+    const result = await saveAlumniProfile(data);
     setBusy(false);
     setMessage(result.message);
     setMessageOk(result.ok);

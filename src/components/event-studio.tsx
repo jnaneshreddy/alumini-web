@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { CalendarDays, CheckCircle2, Clock3, ImagePlus, LoaderCircle, MapPin, Pencil, Save, Trash2, UploadCloud } from "lucide-react";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { deleteEvent, saveEvent } from "@/app/admin/events/actions";
 
@@ -16,7 +16,8 @@ export function EventStudio({ events }: { events: EventRecord[] }) {
   const [message, setMessage] = useState("");
   const [messageOk, setMessageOk] = useState(false);
   const selected = useMemo(() => events.find((event) => event.id === selectedId) ?? null, [events, selectedId]);
-  const submit = async (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); setBusy(true); setMessage(""); const result = await saveEvent(new FormData(event.currentTarget)); setBusy(false); setMessage(result.message); setMessageOk(result.ok); if (result.ok) { setSelectedId(null); setPreview(null); router.refresh(); } };
+  useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
+  const submit = async (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); const form = event.currentTarget; const data = new FormData(form); setBusy(true); setMessage(""); const result = await saveEvent(data); setBusy(false); setMessage(result.message); setMessageOk(result.ok); if (result.ok) { form.reset(); setSelectedId(null); setPreview(null); router.refresh(); } };
   return <div className="eventStudio">
     <section className="studioIntro"><div><p className="adminKicker">COMMUNITY CALENDAR</p><h1>Events</h1><p>Plan each gathering and publish a polished bilingual event experience.</p></div><div className="studioCount"><CalendarDays size={18}/><span>{events.length}</span><small>events</small></div></section>
     <div className="eventGrid">

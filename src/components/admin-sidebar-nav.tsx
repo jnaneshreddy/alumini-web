@@ -10,6 +10,7 @@ import {
   ScrollText,
   Settings,
   GraduationCap,
+  Trophy,
   Users,
 } from "lucide-react";
 
@@ -22,6 +23,7 @@ const nav = [
   ["/admin/announcements", "Announcements", Bell],
   ["/admin/gallery", "Photo gallery", Images],
   ["/admin/memories", "Memories", Image],
+  ["/admin/mcl", "MCL", Trophy],
   ["/admin/carousel", "Hero carousel", Image],
   ["/admin/feedback", "Feedback", MessageSquare],
   ["/admin/activity", "Activity log", ScrollText],
