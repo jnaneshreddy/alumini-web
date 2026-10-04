@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { Command, LogOut, Menu, Search, Settings, X } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
@@ -25,7 +26,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   return <main className="commandCenter">
     <button className={`adminDrawerBackdrop ${navOpen ? "open" : ""}`} type="button" aria-label="Close admin navigation" onClick={() => setNavOpen(false)}/>
     <aside className={`commandSidebar ${navOpen ? "open" : ""}`} aria-label="Administration navigation">
-      <div className="commandBrand"><span>{identity.portalName.slice(0,1).toUpperCase()}</span><div><b>{identity.portalName}</b><small>ADMINISTRATION</small></div><button className="sidebarClose" type="button" onClick={() => setNavOpen(false)} aria-label="Close admin navigation"><X/></button></div>
+      <div className="commandBrand"><span><Image src="/school-logo-transparent.png" alt="" width={38} height={38} unoptimized/></span><div><b>{identity.portalName}</b><small>ADMINISTRATION</small></div><button className="sidebarClose" type="button" onClick={() => setNavOpen(false)} aria-label="Close admin navigation"><X/></button></div>
       <AdminSidebarNav onNavigate={() => setNavOpen(false)}/>
       <div className="profilePanel"><div className="profileAvatar">{identity.fullName.slice(0,1).toUpperCase()}</div><div><b>{identity.fullName}</b><small>{identity.role.replaceAll("_", " ").toLowerCase()}</small></div></div>
       <form action={signOut} className="sidebarLogout"><button type="submit"><LogOut size={17}/>Sign out</button></form>

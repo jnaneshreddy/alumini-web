@@ -280,6 +280,7 @@ model MclSeason {
   logoStoragePath    String?         @unique
   startDate          DateTime?
   endDate            DateTime?
+  datesToBeDecided   Boolean         @default(false)
   venueEn            String?
   venueKn            String?
   status             MclSeasonStatus @default(PLANNED)

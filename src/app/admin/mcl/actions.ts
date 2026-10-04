@@ -63,8 +63,9 @@ export async function saveMclSeason(data: FormData): Promise<MclActionResult> {
   if (!Number.isInteger(year) || year < 1900 || year > currentYear + 5) return { ok: false, message: `Enter a valid tournament year between 1900 and ${currentYear + 5}.` };
   const titleEn = text(data, "titleEn");
   if (titleEn.length < 2) return { ok: false, message: "Tournament title in English is required." };
-  const startDate = nullableDate(data, "startDate");
-  const endDate = nullableDate(data, "endDate");
+  const datesToBeDecided = data.get("datesToBeDecided") === "on";
+  const startDate = datesToBeDecided ? null : nullableDate(data, "startDate");
+  const endDate = datesToBeDecided ? null : nullableDate(data, "endDate");
   if (startDate && endDate && endDate < startDate) return { ok: false, message: "End date cannot be before the start date." };
   const statusText = text(data, "status") as MclSeasonStatus;
   const status = statuses.includes(statusText) ? statusText : "PLANNED";
@@ -81,7 +82,7 @@ export async function saveMclSeason(data: FormData): Promise<MclActionResult> {
       year, titleEn, titleKn: text(data, "titleKn") || null,
       descriptionEn: text(data, "descriptionEn") || null, descriptionKn: text(data, "descriptionKn") || null,
       detailedEn: text(data, "detailedEn") || null, detailedKn: text(data, "detailedKn") || null,
-      startDate, endDate, venueEn: text(data, "venueEn") || null, venueKn: text(data, "venueKn") || null,
+      startDate, endDate, datesToBeDecided, venueEn: text(data, "venueEn") || null, venueKn: text(data, "venueKn") || null,
       status, isPublished: data.get("isPublished") === "on", verifiedStatistics: statistics,
       championTeamId: teamId("championTeamId"), runnerUpTeamId: teamId("runnerUpTeamId"), thirdPlaceTeamId: teamId("thirdPlaceTeamId"),
       coverImageUrl: cover?.imageUrl ?? existing?.coverImageUrl ?? null, coverStoragePath: cover?.storagePath ?? existing?.coverStoragePath ?? null,

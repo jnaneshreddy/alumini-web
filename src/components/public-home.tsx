@@ -71,7 +71,7 @@ function Header({ locale, setLocale }: { locale: PublicLocale; setLocale: (local
   return <>
     <a className="heritage-skip" href="#main-content">{t.skip}</a>
     <header className={`heritage-header ${compact ? "is-compact" : ""}`}>
-      <a className="heritage-brand" href="#home" aria-label={`${t.school} ${t.home}`}><span aria-hidden="true">M</span><span><strong>{t.school}</strong><small>{t.alumni}</small></span></a>
+      <a className="heritage-brand" href="#home" aria-label={`${t.school} ${t.home}`}><span aria-hidden="true"><Image src="/school-logo-transparent.png" alt="" width={50} height={50} priority unoptimized/></span><span><strong>{t.school}</strong><small>{t.alumni}</small></span></a>
       <nav className="heritage-desktop-nav" aria-label="Primary navigation">{navTargets.map((target) => <a key={target} href={`#${target}`}>{label[target]}</a>)}<Link className="heritage-join-link" href="/join">Join community</Link></nav>
       <div className="heritage-header-actions"><LanguageSwitch locale={locale} setLocale={setLocale}/><button className="heritage-menu-button" type="button" onClick={() => setOpen(true)} aria-label={t.openMenu} aria-expanded={open}><Menu size={21}/></button></div>
     </header>
@@ -152,7 +152,7 @@ function Announcements({ notices, locale }: { notices: PublicNotice[]; locale: P
 
 function Footer({ locale, setLocale }: { locale: PublicLocale; setLocale: (locale: PublicLocale) => void }) {
   const t = publicMessages[locale];
-  return <footer className="heritage-footer"><div><p className="heritage-eyebrow light">{t.established}</p><h2>{t.school}</h2><p>{t.footerLine}</p></div><address>{t.address}</address><nav aria-label="Footer navigation"><a href="#story">{t.story}</a><a href="#events">{t.events}</a><a href="#announcements">{t.announcements}</a><Link href="/mcl">{t.mcl}</Link><a href="#feedback">{t.feedback}</a><Link href="/join">Join community</Link><Link href="/admin/login">{t.admin}</Link></nav><div className="footer-base"><span>© {new Date().getFullYear()} {t.rights}</span><LanguageSwitch locale={locale} setLocale={setLocale}/></div></footer>;
+  return <footer className="heritage-footer"><div><p className="heritage-eyebrow light">{t.established}</p><h2>{t.school}</h2><p>{t.footerLine}</p></div><address>{t.address}</address><nav aria-label="Footer navigation"><a href="#story">{t.story}</a><a href="#events">{t.events}</a><a href="#announcements">{t.announcements}</a><Link href="/mcl">{t.mcl}</Link><a href="#feedback">{t.feedback}</a><Link href="/join">Join community</Link><Link href="/admin/login">{t.admin}</Link></nav><div className="heritage-footer-seal"><Image src="/school-logo-transparent.png" alt={`${t.school} emblem`} width={240} height={240} unoptimized/></div><div className="footer-base"><span>© {new Date().getFullYear()} {t.rights}</span><LanguageSwitch locale={locale} setLocale={setLocale}/></div></footer>;
 }
 
 export function PublicHome({ slides, notices, events, gallery, teachers, mcl, unavailable }: Props) {

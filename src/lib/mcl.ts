@@ -24,7 +24,7 @@ export function serializeMclSeason(season: SeasonPayload) {
   return {
     id: season.id, year: season.year, titleEn: season.titleEn, titleKn: season.titleKn,
     descriptionEn: season.descriptionEn, descriptionKn: season.descriptionKn, detailedEn: season.detailedEn, detailedKn: season.detailedKn,
-    coverImageUrl: season.coverImageUrl, logoUrl: season.logoUrl, startDate: season.startDate?.toISOString() ?? null, endDate: season.endDate?.toISOString() ?? null,
+    coverImageUrl: season.coverImageUrl, logoUrl: season.logoUrl, startDate: season.startDate?.toISOString() ?? null, endDate: season.endDate?.toISOString() ?? null, datesToBeDecided: season.datesToBeDecided,
     venueEn: season.venueEn, venueKn: season.venueKn, status: season.status, verifiedStatistics: season.verifiedStatistics,
     championTeam: season.championTeam ? { id: season.championTeam.id, nameEn: season.championTeam.nameEn, nameKn: season.championTeam.nameKn, logoUrl: season.championTeam.logoUrl } : null,
     runnerUpTeam: season.runnerUpTeam ? { id: season.runnerUpTeam.id, nameEn: season.runnerUpTeam.nameEn, nameKn: season.runnerUpTeam.nameKn, logoUrl: season.runnerUpTeam.logoUrl } : null,
