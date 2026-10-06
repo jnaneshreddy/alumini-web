@@ -18,6 +18,7 @@ function refreshTeachers() {
   revalidatePath("/teachers");
   revalidatePath("/admin");
   revalidatePath("/admin/teachers");
+  revalidatePath("/admin/activity");
 }
 
 type TeacherInput = {
@@ -102,7 +103,7 @@ export async function updateTeacher(formData: FormData): Promise<TeacherActionRe
     const storagePath = upload?.storagePath ?? (removeImage ? null : existing.storagePath);
     const nextPublished = imageUrl ? parsed.data.isPublished : false;
     const teacher = await prisma.teacher.update({ where: { id }, data: { ...parsed.data, isPublished: nextPublished, imageUrl, storagePath, updatedById: actor.id } });
-    const actionLogs: Prisma.AuditLogCreateManyInput[] = [{ userId: actor.id, action: "TEACHER_UPDATED", entityType: "Teacher", entityId: id, oldData: { nameEn: existing.nameEn, designationEn: existing.designationEn }, newData: { nameEn: teacher.nameEn, designationEn: teacher.designationEn } }];
+    const actionLogs: Prisma.AuditLogCreateManyInput[] = [{ userId: actor.id, action: "TEACHER_UPDATED", entityType: "Teacher", entityId: id, oldData: { nameEn: existing.nameEn, nameKn: existing.nameKn, designationEn: existing.designationEn, designationKn: existing.designationKn, descriptionEn: existing.descriptionEn, descriptionKn: existing.descriptionKn, startYear: existing.startYear, endYear: existing.endYear, isCurrent: existing.isCurrent, isPublished: existing.isPublished, sortOrder: existing.sortOrder, imageUrl: existing.imageUrl }, newData: { nameEn: teacher.nameEn, nameKn: teacher.nameKn, designationEn: teacher.designationEn, designationKn: teacher.designationKn, descriptionEn: teacher.descriptionEn, descriptionKn: teacher.descriptionKn, startYear: teacher.startYear, endYear: teacher.endYear, isCurrent: teacher.isCurrent, isPublished: teacher.isPublished, sortOrder: teacher.sortOrder, imageUrl: teacher.imageUrl } }];
     if (existing.isPublished !== teacher.isPublished) actionLogs.push({ userId: actor.id, action: teacher.isPublished ? "TEACHER_PUBLISHED" : "TEACHER_UNPUBLISHED", entityType: "Teacher", entityId: id, oldData: { isPublished: existing.isPublished }, newData: { isPublished: teacher.isPublished } });
     if (existing.isCurrent !== teacher.isCurrent) actionLogs.push({ userId: actor.id, action: teacher.isCurrent ? "TEACHER_MARKED_CURRENT" : "TEACHER_MARKED_FORMER", entityType: "Teacher", entityId: id, oldData: { isCurrent: existing.isCurrent }, newData: { isCurrent: teacher.isCurrent } });
     if (upload || removeImage) actionLogs.push({ userId: actor.id, action: "TEACHER_IMAGE_UPDATED", entityType: "Teacher", entityId: id, oldData: { storagePath: existing.storagePath }, newData: { storagePath } });

@@ -1,0 +1,16 @@
+.list { display: grid; gap: .75rem; }
+.item { overflow: hidden; border: 1px solid var(--line, #dfe5df); border-radius: 1rem; background: #fff; }
+.trigger { display: grid; grid-template-columns: minmax(10rem, 1.25fr) minmax(8rem, 1fr) auto 2rem; align-items: center; width: 100%; gap: 1rem; padding: 1rem 1.1rem; border: 0; color: inherit; background: transparent; text-align: left; cursor: pointer; }
+.trigger:hover, .trigger:focus-visible { background: #f5f8f5; }
+.trigger:focus-visible { outline: 3px solid rgba(41, 97, 76, .22); outline-offset: -3px; }
+.identity { display: grid; min-width: 0; gap: .2rem; }
+.identity strong, .identity span, .action, .trigger time { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.identity span, .action, .trigger time { color: #627068; font-size: .84rem; }
+.chevron { display: grid; width: 1.8rem; height: 1.8rem; place-items: center; border-radius: 999px; color: #245e49; background: #eaf2ed; font-weight: 800; }
+.detail { margin: 0; padding: .85rem 1.1rem; border-top: 1px solid var(--line, #dfe5df); color: #173e31; background: #f7faf7; font-weight: 650; line-height: 1.45; }
+.empty { padding: 2rem; border: 1px dashed var(--line, #dfe5df); border-radius: 1rem; color: #627068; text-align: center; }
+@media (max-width: 700px) {
+  .trigger { grid-template-columns: minmax(0, 1fr) auto; gap: .45rem .75rem; }
+  .action, .trigger time { grid-column: 1; }
+  .chevron { grid-column: 2; grid-row: 1 / span 3; }
+}

@@ -24,6 +24,7 @@ function refreshGallery() {
   revalidatePath("/admin");
   revalidatePath("/admin/gallery");
   revalidatePath("/admin/memories");
+  revalidatePath("/admin/activity");
 }
 
 export async function uploadGalleryImage(formData: FormData): Promise<GalleryActionResult> {
@@ -103,7 +104,7 @@ export async function updateGalleryImage(formData: FormData): Promise<GalleryAct
       sortOrder: Number.parseInt(text(formData, "sortOrder") || "0", 10) || 0,
     },
   });
-  await prisma.auditLog.create({ data: { userId: actor.id, action: "GALLERY_IMAGE_UPDATED", entityType: "GalleryImage", entityId: id, oldData: { galleryType: existing.galleryType, category: existing.category, isFeatured: existing.isFeatured, isPublished: existing.isPublished }, newData: { galleryType: updated.galleryType, category: updated.category, isFeatured: updated.isFeatured, isPublished: updated.isPublished } } });
+  await prisma.auditLog.create({ data: { userId: actor.id, action: "GALLERY_IMAGE_UPDATED", entityType: "GalleryImage", entityId: id, oldData: { titleEn: existing.titleEn, titleKn: existing.titleKn, descriptionEn: existing.descriptionEn, descriptionKn: existing.descriptionKn, altText: existing.altText, galleryType: existing.galleryType, category: existing.category, eventId: existing.eventId, date: existing.date?.toISOString() ?? null, isFeatured: existing.isFeatured, isPublished: existing.isPublished, sortOrder: existing.sortOrder }, newData: { titleEn: updated.titleEn, titleKn: updated.titleKn, descriptionEn: updated.descriptionEn, descriptionKn: updated.descriptionKn, altText: updated.altText, galleryType: updated.galleryType, category: updated.category, eventId: updated.eventId, date: updated.date?.toISOString() ?? null, isFeatured: updated.isFeatured, isPublished: updated.isPublished, sortOrder: updated.sortOrder } } });
   refreshGallery();
   return { ok: true, message: "Photo details saved." };
 }

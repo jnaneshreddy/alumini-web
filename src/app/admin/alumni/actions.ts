@@ -68,8 +68,8 @@ export async function saveAlumniProfile(formData: FormData): Promise<AlumniActio
       action: existing ? "ALUMNI_PROFILE_UPDATED" : "ALUMNI_PROFILE_CREATED",
       entityType: "AlumniProfile",
       entityId: record.id,
-      oldData: existing ? { verificationStatus: existing.verificationStatus, isPublished: existing.isPublished, consentToPublish: existing.consentToPublish } : undefined,
-      newData: { verificationStatus, isPublished: requestedPublished, consentToPublish },
+      oldData: existing ? { fullName: existing.fullName, registrantType: existing.registrantType, email: existing.email, phone: existing.phone, batch: existing.batch, graduationYear: existing.graduationYear, city: existing.city, profession: existing.profession, bio: existing.bio, avatarUrl: existing.avatarUrl, verificationStatus: existing.verificationStatus, isPublished: existing.isPublished, consentToPublish: existing.consentToPublish } : undefined,
+      newData: { fullName: record.fullName, registrantType: record.registrantType, email: record.email, phone: record.phone, batch: record.batch, graduationYear: record.graduationYear, city: record.city, profession: record.profession, bio: record.bio, avatarUrl: record.avatarUrl, verificationStatus, isPublished: requestedPublished, consentToPublish },
     },
   });
   await notifyAdmins({

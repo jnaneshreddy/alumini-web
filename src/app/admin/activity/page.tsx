@@ -1,4 +1,39 @@
-import { ScrollText } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
-export default async function ActivityPage(){await requireAdmin();const logs=await prisma.auditLog.findMany({include:{user:true},orderBy:{createdAt:"desc"},take:100});return <section className="adminRoutePage"><div className="usersWorkspace"><section className="usersHeader"><div><p className="adminKicker">AUDIT TRAIL</p><h1>Activity log</h1><span>Account and workspace actions recorded by the administration system.</span></div></section><section className="usersPanel"><div className="feedbackInbox">{logs.length?logs.map(log=><article key={log.id}><span className="feedbackInboxIcon"><ScrollText size={18}/></span><div><div className="feedbackInboxMeta"><b>{log.user?.fullName??"System"}</b><span>{log.entityType}</span><time>{log.createdAt.toLocaleString("en-GB",{dateStyle:"medium",timeStyle:"short"})}</time></div><p>{log.action.replaceAll("_"," ").toLowerCase()}</p></div></article>):<div className="usersEmpty"><ScrollText size={25}/><b>No activity recorded yet</b><small>Workspace actions will appear here when they are captured.</small></div>}</div></section></div></section>}
+import { ActivityLog } from "@/components/activity-log";
+
+export default async function ActivityPage() {
+  await requireAdmin();
+  const logs = await prisma.auditLog.findMany({
+    include: { user: { select: { fullName: true, email: true } } },
+    orderBy: { createdAt: "desc" },
+    take: 100,
+  });
+
+  return (
+    <section className="adminRoutePage">
+      <div className="usersWorkspace">
+        <section className="usersHeader">
+          <div>
+            <p className="adminKicker">AUDIT TRAIL</p>
+            <h1>Activity log</h1>
+            <span>Open an entry to see a one-line summary of exactly what changed.</span>
+          </div>
+        </section>
+        <section className="usersPanel">
+          <ActivityLog
+            items={logs.map((log) => ({
+              id: log.id,
+              action: log.action,
+              entityType: log.entityType,
+              oldData: log.oldData,
+              newData: log.newData,
+              createdAt: log.createdAt.toISOString(),
+              user: log.user ? { name: log.user.fullName, email: log.user.email } : null,
+            }))}
+          />
+        </section>
+      </div>
+    </section>
+  );
+}

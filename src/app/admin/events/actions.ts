@@ -78,7 +78,7 @@ export type EventActionResult = { ok: boolean; message: string };
 
 export async function saveEvent(formData: FormData): Promise<EventActionResult> {
   try {
-    await requireRole(...contentRoles);
+    const actor = await requireRole(...contentRoles);
 
     const id = text(formData, "id");
     const title = text(formData, "title");
@@ -126,20 +126,24 @@ export async function saveEvent(formData: FormData): Promise<EventActionResult> 
       publication: publication as "DRAFT" | "PUBLISHED" | "ARCHIVED",
     };
 
-    if (id) {
-      await prisma.event.update({
-        where: { id },
-        data: payload,
-      });
-    } else {
-      await prisma.event.create({
-        data: payload,
-      });
-    }
+    const event = id
+      ? await prisma.event.update({ where: { id }, data: payload })
+      : await prisma.event.create({ data: payload });
+    await prisma.auditLog.create({
+      data: {
+        userId: actor.id,
+        action: existingEvent ? "EVENT_UPDATED" : "EVENT_CREATED",
+        entityType: "Event",
+        entityId: event.id,
+        oldData: existingEvent ? { title: existingEvent.title, titleKn: existingEvent.titleKn, description: existingEvent.description, descriptionKn: existingEvent.descriptionKn, eventDate: existingEvent.eventDate.toISOString(), startTime: existingEvent.startTime, endTime: existingEvent.endTime, venue: existingEvent.venue, venueKn: existingEvent.venueKn, imagePath: existingEvent.imagePath, status: existingEvent.status, publication: existingEvent.publication } : undefined,
+        newData: { title: event.title, titleKn: event.titleKn, description: event.description, descriptionKn: event.descriptionKn, eventDate: event.eventDate.toISOString(), startTime: event.startTime, endTime: event.endTime, venue: event.venue, venueKn: event.venueKn, imagePath: event.imagePath, status: event.status, publication: event.publication },
+      },
+    });
 
     revalidatePath("/");
     revalidatePath("/admin");
     revalidatePath("/admin/events");
+    revalidatePath("/admin/activity");
     return { ok: true, message: id ? "Event updated successfully. You can now create a new event." : "Event created successfully." };
   } catch (error) {
     console.error("saveEvent failed", error);
@@ -149,7 +153,7 @@ export async function saveEvent(formData: FormData): Promise<EventActionResult> 
 
 export async function deleteEvent(formData: FormData) {
   try {
-    await requireRole(...contentRoles);
+    const actor = await requireRole(...contentRoles);
 
     const id = text(formData, "id");
 
@@ -167,11 +171,16 @@ export async function deleteEvent(formData: FormData) {
       }
     }
 
-    await prisma.event.delete({ where: { id } });
+    if (!event) return;
+    await prisma.$transaction([
+      prisma.auditLog.create({ data: { userId: actor.id, action: "EVENT_DELETED", entityType: "Event", entityId: id, oldData: { title: event.title, eventDate: event.eventDate.toISOString(), status: event.status, publication: event.publication } } }),
+      prisma.event.delete({ where: { id } }),
+    ]);
 
     revalidatePath("/");
     revalidatePath("/admin");
     revalidatePath("/admin/events");
+    revalidatePath("/admin/activity");
   } catch (error) {
     console.error("deleteEvent failed", error);
     return;

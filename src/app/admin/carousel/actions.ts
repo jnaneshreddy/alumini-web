@@ -77,7 +77,7 @@ async function saveUploadedImage(file: File | null, existingPath?: string) {
 export type CarouselActionResult = { ok: boolean; message: string };
 
 export async function saveCarouselSlide(formData: FormData): Promise<CarouselActionResult> {
-  await requireRole(...contentRoles);
+  const actor = await requireRole(...contentRoles);
 
   const id = text(formData, "id");
   const title = text(formData, "title");
@@ -111,20 +111,24 @@ export async function saveCarouselSlide(formData: FormData): Promise<CarouselAct
     position: Number.isFinite(normalizedPosition) ? normalizedPosition : 0,
   };
 
-  if (id) {
-    await prisma.carouselSlide.update({
-      where: { id },
-      data: payload,
-    });
-  } else {
-    await prisma.carouselSlide.create({
-      data: payload,
-    });
-  }
+  const slide = id
+    ? await prisma.carouselSlide.update({ where: { id }, data: payload })
+    : await prisma.carouselSlide.create({ data: payload });
+  await prisma.auditLog.create({
+    data: {
+      userId: actor.id,
+      action: existingSlide ? "CAROUSEL_SLIDE_UPDATED" : "CAROUSEL_SLIDE_CREATED",
+      entityType: "CarouselSlide",
+      entityId: slide.id,
+      oldData: existingSlide ? { title: existingSlide.title, altText: existingSlide.altText, caption: existingSlide.caption, imagePath: existingSlide.imagePath, status: existingSlide.status, position: existingSlide.position } : undefined,
+      newData: { title: slide.title, altText: slide.altText, caption: slide.caption, imagePath: slide.imagePath, status: slide.status, position: slide.position },
+    },
+  });
 
   revalidatePath("/");
   revalidatePath("/admin");
   revalidatePath("/admin/carousel");
+  revalidatePath("/admin/activity");
   return { ok: true, message: id ? "Carousel slide updated successfully. You can now add a new slide." : "Carousel slide created successfully." };
 }
 
@@ -133,7 +137,7 @@ export async function submitCarouselSlide(formData: FormData): Promise<void> {
 }
 
 export async function deleteCarouselSlide(formData: FormData) {
-  await requireRole(...contentRoles);
+  const actor = await requireRole(...contentRoles);
 
   const id = text(formData, "id");
 
@@ -151,9 +155,14 @@ export async function deleteCarouselSlide(formData: FormData) {
     }
   }
 
-  await prisma.carouselSlide.delete({ where: { id } });
+  if (!slide) return;
+  await prisma.$transaction([
+    prisma.auditLog.create({ data: { userId: actor.id, action: "CAROUSEL_SLIDE_DELETED", entityType: "CarouselSlide", entityId: id, oldData: { title: slide.title, status: slide.status, position: slide.position } } }),
+    prisma.carouselSlide.delete({ where: { id } }),
+  ]);
 
   revalidatePath("/");
   revalidatePath("/admin");
   revalidatePath("/admin/carousel");
+  revalidatePath("/admin/activity");
 }
