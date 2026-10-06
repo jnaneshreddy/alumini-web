@@ -1,0 +1,87 @@
+/* Password management and final mobile containment layer. */
+.adminPasswordForm {
+  display: grid;
+  gap: 14px;
+}
+
+.adminPasswordForm > p {
+  margin: 0;
+  padding: 12px;
+  border-left: 2px solid #e5b65e;
+  background: #e5b65e12;
+  color: #c8b99f;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.adminPasswordForm > p strong { color: #fff; }
+.adminPasswordForm label { display: grid; gap: 6px; color: #aab9cd; font-size: 10px; font-weight: 750; }
+.adminPasswordForm input { width: 100%; padding: 11px; border: 1px solid #ffffff17; border-radius: 10px; outline: 0; background: #070d18; color: #eef4ff; font: inherit; font-size: 12px; }
+.adminPasswordForm input:focus { border-color: #7898ff; box-shadow: 0 0 0 3px #6688ff1b; }
+.adminPasswordForm small { color: #75869e; font-size: 9px; }
+
+.passwordPanel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: start;
+  margin-top: 14px;
+  padding: 22px;
+  border: 1px solid var(--admin-line);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.passwordPanel > header { display: flex; align-self: start; align-items: flex-start; gap: 11px; }
+.passwordPanel > header > svg { box-sizing: content-box; flex: none; padding: 9px; border-radius: 8px; background: #f7ecd8; color: #805518; }
+.passwordPanel h2 { margin: 0; color: var(--admin-ink); font: 500 20px/1.2 Georgia, serif; }
+.passwordPanel header span { display: block; margin-top: 5px; color: var(--admin-copy-muted); font-size: 10px; line-height: 1.5; }
+.passwordPanel > .settingsMessage { grid-column: 1 / -1; margin: 0; }
+.passwordFields { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.passwordFields label { display: grid; gap: 6px; color: var(--admin-copy); font-size: 10px; font-weight: 750; }
+.passwordFields input { width: 100%; padding: 11px; border: 1px solid var(--admin-line); border-radius: 8px; outline: 0; background: #fff; color: var(--admin-ink); font: inherit; font-size: 12px; }
+.passwordFields input:focus { border-color: #789484; box-shadow: 0 0 0 3px #28584618; }
+.passwordFields small { color: var(--admin-copy-soft); font-size: 9px; line-height: 1.45; }
+.passwordPanel > button { display: flex; grid-column: 2; grid-row: 1; min-height: 42px; align-self: center; align-items: center; justify-content: center; gap: 7px; padding: 0 14px; border: 0; border-radius: 8px; background: var(--admin-green); color: #fff; font-size: 11px; font-weight: 800; white-space: nowrap; cursor: pointer; }
+.passwordPanel > button:disabled { cursor: wait; opacity: .55; }
+
+.commandCenter { width: 100%; max-width: 100%; overflow-x: clip; }
+.commandWorkspace { overflow-x: clip; }
+.commandWorkspace,
+.commandWorkspace > *,
+.adminRoutePage,
+.adminDashboard,
+.teacherStudio,
+.usersWorkspace,
+.alumniWorkspace,
+.settingsWorkspace { min-width: 0; max-width: 100%; }
+.usersPanel,
+.alumniPanel,
+.ledgerPanel { min-width: 0; max-width: 100%; overflow: hidden; }
+.usersTable,
+.ledgerTable,
+.alumniTable {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
+  contain: inline-size;
+}
+
+@media (max-width: 1050px) {
+  .passwordPanel { grid-template-columns: 1fr; }
+  .passwordPanel > button { grid-column: 1; grid-row: auto; justify-self: start; }
+}
+
+@media (max-width: 768px) {
+  .commandWorkspace :is(input, select, textarea) { font-size: 16px; }
+  .alumniTable table { width: 720px; min-width: 720px; }
+  .passwordFields { grid-template-columns: 1fr; }
+  .passwordPanel > button { width: 100%; justify-self: stretch; }
+}
+
+@media (max-width: 480px) {
+  .passwordPanel { padding: 16px; }
+}

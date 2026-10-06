@@ -6,13 +6,45 @@ import { notifyAdmins } from "@/lib/admin-notifications";
 import { prisma } from "@/lib/prisma";
 import { adminRoles, requireRole } from "@/lib/permissions";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { canChangeManagedUserRole, canChangeManagedUserStatus, canDeleteManagedUser } from "@/lib/user-role-policy";
+import { canChangeManagedUserRole, canChangeManagedUserStatus, canDeleteManagedUser, canResetManagedUserPassword } from "@/lib/user-role-policy";
 
 export type UserActionResult = { ok: boolean; message: string };
 const roles: Role[] = ["USER", "ADMIN", "SUPER_ADMIN"];
 const text = (formData: FormData, key: string) => String(formData.get(key) ?? "").trim();
 
 function refreshUsers() { revalidatePath("/admin/users"); revalidatePath("/admin"); revalidatePath("/admin/activity"); }
+
+function passwordError(password: string) {
+  if (password.length < 8) return "The new password must contain at least 8 characters.";
+  if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) return "The new password must contain at least one letter and one number.";
+  return null;
+}
+
+export async function resetManagedUserPassword(formData: FormData): Promise<UserActionResult> {
+  const actor = await requireRole(...adminRoles);
+  const targetId = text(formData, "userId");
+  const password = String(formData.get("newPassword") ?? "");
+  const confirmation = String(formData.get("confirmPassword") ?? "");
+  const validationError = passwordError(password);
+  if (validationError) return { ok: false, message: validationError };
+  if (password !== confirmation) return { ok: false, message: "The password confirmation does not match." };
+  const target = await prisma.userProfile.findUnique({ where: { id: targetId } });
+  if (!target) return { ok: false, message: "User not found." };
+  if (target.id === actor.id) return { ok: false, message: "Update your own password from Settings." };
+  if (!target.active) return { ok: false, message: "Passwords can only be reset for active accounts." };
+  if (!canResetManagedUserPassword(actor.role, target.role)) return { ok: false, message: "You do not have permission to update this account's password." };
+
+  const update = await createAdminClient().auth.admin.updateUserById(target.authUserId, { password });
+  if (update.error) return { ok: false, message: update.error.message || "Unable to update this user's password." };
+  try {
+    await prisma.auditLog.create({ data: { userId: actor.id, action: "USER_PASSWORD_RESET", entityType: "UserProfile", entityId: target.id, newData: { targetEmail: target.email, targetRole: target.role } } });
+    await notifyAdmins({ title: "User password updated", message: `${actor.fullName} updated the password for ${target.fullName}.`, topic: "ACCESS", href: "/admin/users", excludeUserId: actor.id });
+  } catch (error) {
+    console.error("User password changed but follow-up logging failed", error);
+  }
+  refreshUsers();
+  return { ok: true, message: `${target.fullName}'s password was updated successfully.` };
+}
 
 export async function changeUserRole(formData: FormData): Promise<UserActionResult> {
   const actor = await requireRole(...adminRoles);

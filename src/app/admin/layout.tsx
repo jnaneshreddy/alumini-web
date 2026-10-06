@@ -15,6 +15,7 @@ import "./redesign.css";
 import "./contrast-fixes.css";
 import "./workspaces.css";
 import "./responsive.css";
+import "./security-responsive.css";
 import { AdminShell } from "@/components/admin-shell";
 
 export default function AdminLayout({ children }: LayoutProps<"/admin">) {
